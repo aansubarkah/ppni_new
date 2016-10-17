@@ -224,4 +224,4 @@ if (Configure::read('debug')) {
 
 Plugin::load('Migrations');
 
-Plugin::load('BootstarpUI');
+Plugin::load('BootstrapUI');

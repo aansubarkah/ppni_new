@@ -12,6 +12,7 @@
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
  */
 namespace App\View;
+use BootstrapUI\View\UIView;
 
 use Cake\View\View;
 
@@ -22,7 +23,8 @@ use Cake\View\View;
  *
  * @link http://book.cakephp.org/3.0/en/views.html#the-app-view
  */
-class AppView extends View
+//class AppView extends View
+class AppView extends UIView
 {
 
     /**
