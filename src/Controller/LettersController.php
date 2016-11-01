@@ -10,6 +10,16 @@ use App\Controller\AppController;
  */
 class LettersController extends AppController
 {
+    public $limit = 10;
+
+    /*
+     * breadcrumbs variable, format like
+     * [['link 1', 'link title 1'], ['link 2', 'link title 2']]
+     *
+     * */
+    public $breadcrumbs = [
+        ['letters', 'Surat Masuk']
+    ];
 
     /**
      * Index method
@@ -18,11 +28,35 @@ class LettersController extends AppController
      */
     public function index()
     {
-        $this->paginate = [
-            'contain' => ['Senders', 'Users', 'Vias']
-        ];
-        $letters = $this->paginate($this->Letters);
+        $query = $this->Letters->find('all', [
+            'contain' => ['Senders'],
+            'limit' => $this->limit
+        ]);
+        if ($this->request->query('search'))
+        {
+            $query->where(['content LIKE' => '%' . $this->request->query('search') . '%']);
+        }
+        if ($this->request->query('sort'))
+        {
+            $query->order([
+                $this->request->query('sort') => $this->request->query('direction')
+            ]);
+        } else {
+            $query->order(['date' => 'DESC']);
+        }
+        $this->paginate = ['limit' => $this->limit];
+        /*$this->paginate = [
+            'contain' => ['Senders', 'Users', 'Vias'],
+            'order' => ['date' => 'DESC'],
+            'limit' => $this->limit
+        ];*/
+        $breadcrumbs = $this->breadcrumbs;
+        $this->set('breadcrumbs', $breadcrumbs);
 
+        $letters = $this->paginate($query);
+        $this->set('title', 'Surat Masuk');
+        $this->set('limit', $this->limit);
+        $this->set('isShowAddButton', true);
         $this->set(compact('letters'));
         $this->set('_serialize', ['letters']);
     }
@@ -40,6 +74,14 @@ class LettersController extends AppController
             'contain' => ['Senders', 'Users', 'Vias', 'Evidences', 'Dispositions']
         ]);
 
+        $breadcrumbs = $this->breadcrumbs;
+        array_push($breadcrumbs, [
+            'view/' . $letter['id'],
+            $letter['number']
+        ]);
+        $this->set('breadcrumbs', $breadcrumbs);
+
+        $this->set('title', $letter['number']);
         $this->set('letter', $letter);
         $this->set('_serialize', ['letter']);
     }
@@ -119,4 +161,21 @@ class LettersController extends AppController
 
         return $this->redirect(['action' => 'index']);
     }
+
+    public function isAuthorized($user)
+    {
+        // All registered users can add letters
+        if ($this->request->action === 'add') {
+            return true;
+        }
+
+        //
+        return parent::isAuthorized($user);
+    }
+
+    public function beforeRender(\Cake\Event\Event $event)
+    {
+        $this->viewBuilder()->theme('Bootstrap');
+    }
+
 }

@@ -43,6 +43,17 @@ class AppController extends Controller
 
         $this->loadComponent('RequestHandler');
         $this->loadComponent('Flash');
+        $this->loadComponent('Auth', [
+            'authorize' => ['Controller'],
+            'loginRedirect' => [
+                'controller' => 'Letters',
+                'action' => 'index'
+            ],
+            'logoutRedirect' => [
+                'controller' => 'Letters',
+                'action' => 'index'
+            ]
+        ]);
     }
 
     /**
@@ -58,5 +69,26 @@ class AppController extends Controller
         ) {
             $this->set('_serialize', true);
         }
+    }
+
+    public function beforeFilter(Event $event)
+    {
+        $this->Auth->allow(['index', 'view', 'display']);
+    }
+
+    public function isAuthorized($user)
+    {
+        // Admin can access every action
+        if (isset($user['group_id']) && $user['group_id'] == 1) {
+            return true;
+        }
+
+        // Manager can access every action
+        if (isset($user['group_id']) && $user['group_id'] == 2) {
+            return true;
+        }
+
+        // Default deny
+        return false;
     }
 }
