@@ -38,5 +38,6 @@ class AppView extends UIView
      */
     public function initialize()
     {
+        $this->loadHelper('CakephpJqueryFileUpload.JqueryFileUpload');
     }
 }

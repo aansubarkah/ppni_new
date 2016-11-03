@@ -10,7 +10,8 @@
         "mobiledetect/mobiledetectlib": "2.*",
         "cakephp/migrations": "~1.0",
         "cakephp/plugin-installer": "*",
-        "friendsofcake/bootstrap-ui": "^0.5.1"
+        "friendsofcake/bootstrap-ui": "^0.5.1",
+        "hashmode/cakephp-jquery-file-upload": "~1.0"
     },
     "require-dev": {
         "psy/psysh": "@stable",
@@ -25,7 +26,10 @@
     "autoload": {
         "psr-4": {
             "App\\": "src"
-        }
+        },
+        "classmap": [
+            "vendor/blueimp/jquery-file-upload/server/php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
@@ -36,7 +40,8 @@
     "scripts": {
         "post-install-cmd": "App\\Console\\Installer::postInstall",
         "post-create-project-cmd": "App\\Console\\Installer::postInstall",
-        "post-autoload-dump": "Cake\\Composer\\Installer\\PluginInstaller::postAutoloadDump"
+        "post-autoload-dump": "Cake\\Composer\\Installer\\PluginInstaller::postAutoloadDump",
+        "post-update-cmd": "CakephpJqueryFileUpload\\Console\\Installer::postUpdate"
     },
     "minimum-stability": "beta",
     "prefer-stable": true

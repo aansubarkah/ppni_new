@@ -12,17 +12,15 @@ echo $title;
 ?>
     </title>
 
-    <!-- Bootstrap -->
-<!--
-    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="vendor/metisMenu/metisMenu.min.css" rel="stylesheet">
-    <link href="css/sb-admin-2.min.css" rel="stylesheet">
-    <link href="vendor/morrisjs/morris.css" rel="stylesheet">
-    <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet">
--->
     <?= $this->Html->meta('icon') ?>
     <?php
-echo $this->Html->script('moment-with-locales.min');
+echo $this->Html->script([
+    'jquery.min',
+    'moment-with-locales.min',
+    'bootstrap.min',
+    'sb-admin-2.min',
+    'metisMenu.min'
+]);
 echo $this->Html->css([
     'bootstrap/bootstrap.min',
     'metisMenu/metisMenu.min',
@@ -32,8 +30,6 @@ echo $this->Html->css([
 ]);
     ?>
     <?= $this->fetch('meta') ?>
-    <?= $this->fetch('css') ?>
-    <?= $this->fetch('script') ?>
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -159,7 +155,17 @@ echo $this->Html->link(
                         <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
                         </li>
                         <li class="divider"></li>
-                        <li><a href="login.html"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                        <li>
+<?php
+echo $this->Html->link(
+    '<i class="fa fa-sign-out fa-fw"></i> Logout',
+    [
+        'controller' => 'users',
+        'action' => 'logout'
+    ],
+    ['escape' => false]
+);
+?>
                         </li>
                     </ul>
                     <!-- /.dropdown-user -->
@@ -236,6 +242,23 @@ if (isset($breadcrumbs))
                     </div>
                 </div>
                 <!-- /.breadcrumbs -->
+                <!-- alert -->
+                <div class="row">
+<?php
+if (isset($isError))
+{
+?>
+<div class="col-lg-12">
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <?php echo $this->Flash->render(); ?>
+    </div>
+</div>
+<?php
+}
+?>
+                </div>
+                <!-- /.alert -->
                 <div class="row">
                     <div class="col-lg-12">
                         <h1 class="page-header">
@@ -249,9 +272,22 @@ if (isset($isShowAddButton))
         ['escape' => false]
     );
 }
+if (isset($isShowEditButton))
+{
+    echo $this->Html->link(
+        '<i class="fa fa-pencil fa-fw"></i>',
+        ['controller' => $this->name, 'action' => 'edit', $controllerObjectId],
+        ['escape' => false]
+    );
+    echo $this->Html->link(
+        '<i class="fa fa-trash fa-fw"></i>',
+        ['controller' => $this->name, 'action' => 'delete', $controllerObjectId],
+        ['escape' => false]
+    );
+
+}
 ?>
                         </h1>
-                        <?= $this->Flash->render() ?>
                     </div>
                     <!-- /.col-lg-12 -->
                 </div>
@@ -267,14 +303,5 @@ if (isset($isShowAddButton))
         <!-- /#page-wrapper -->
     </div>
     <!-- /#wrapper -->
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
-    <script src="vendor/metisMenu/metisMenu.min.js"></script>
-    <script src="vendor/raphael/raphael.min.js"></script>>
-    <script src="vendor/morrisjs/morris.min.js"></script>>
-    <script src="data/morris-data.js"></script>
-    <script src="js/sb-admin-2.min.js"></script>>
-  </body>
+    </body>
 </html>
