@@ -144,13 +144,14 @@ class EvidencesController extends AppController
     {
         $this->request->allowMethod(['post', 'delete']);
         $evidence = $this->Evidences->get($id);
-        if ($this->Evidences->delete($evidence)) {
-            $this->Flash->success(__('The evidence has been deleted.'));
-        } else {
-            $this->Flash->error(__('The evidence could not be deleted. Please, try again.'));
-        }
+        $evidence->active = 0;
+        $result = 0;
 
-        return $this->redirect(['action' => 'index']);
+        if ($this->Evidences->save($evidence)) {
+            $result = 1;
+        }
+        $this->set('result', $result);
+        $this->set('_serialize', ['result']);
     }
 
     public function upload()

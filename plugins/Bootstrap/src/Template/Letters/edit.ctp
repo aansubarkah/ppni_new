@@ -12,7 +12,8 @@ echo $this->Form->text('number', [
     'id' => 'number',
     'required',
     'autocomplete' => 'off',
-    'data-error' => 'Nomor harus diisi'
+    'data-error' => 'Nomor harus diisi',
+    'value' => $letter['number']
 ]);
 echo '</div>';
 
@@ -24,7 +25,8 @@ echo $this->Form->text('content', [
     'id' => 'content',
     'required',
     'autocomplete' => 'off',
-    'data-error' => 'Perihal harus diisi'
+    'data-error' => 'Perihal harus diisi',
+    'value' => $letter['content']
 ]);
 echo '</div>';
 
@@ -36,13 +38,16 @@ echo $this->Form->text('sender', [
     'autocomplete' => 'off',
     'id' => 'sender',
     'required',
-    'data-error' => 'Pengirim harus diisi'
+    'data-error' => 'Pengirim harus diisi',
+    'value' => $letter['sender']['name']
 ]);
 echo $this->Form->hidden('sender_id', [
-    'id' => 'sender_id'
+    'id' => 'sender_id',
+    'value' => $letter['sender_id']
 ]);
 echo $this->Form->hidden('sender_name', [
-    'id' => 'sender_name'
+    'id' => 'sender_name',
+    'value' => $letter['sender']['name']
 ]);
 echo '</div>';
 
@@ -52,20 +57,52 @@ echo $this->Form->text('date', [
     'class' => 'form-control datepicker',
     'placeholder' => 'Tanggal',
     'default' => date('d/m/Y'),
-    'id' => 'date'
+    'id' => 'date',
+    'value' => $letter['date']
 ]);
 echo '</div>';
 
 echo '<div class="form-group">';
 echo $this->Form->select('via_id', $viasOptions, [
-    'class' => 'form-control'
+    'class' => 'form-control',
+    'default' => $letter['via_id']
 ]);
 echo '</div>';
 
-//echo '<div class="form-group">';
+echo '<div class="form-group">';
+foreach ($letter['evidences'] as $evidence)
+{
+    echo '<div class="btn-group" id="evidence-' . $evidence['id'] . '">';
+    echo '<button type="button" class="btn btn-default">';
+    echo '<i class="fa fa-file fa-fw"></i>&nbsp;' . $evidence['name'];
+    echo '</button>';
+    echo '<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+    echo '<span class="caret"></span>';
+    echo '<span class="sr-only">Toggle Dropdown</span>';
+    echo '</button>';
+    echo '<ul class="dropdown-menu">';
+    echo '<li>';
+    echo $this->Html->link(
+        '<i class="fa fa-save fa-fw"></i>Unduh',
+        '/download/' . $evidence['id'],
+        ['escape' => false]
+    );
+    echo '</li>';
+    echo '<li>';
+    echo $this->Html->link(
+        '<i class="fa fa-trash fa-fw"></i>Hapus',
+        '#',
+        ['escape' => false, 'class' => 'evidence-delete', 'id' => $evidence['id']]
+    );
+    echo '</li>';
+    echo '</ul>';
+    echo '</div>';
+    echo '&nbsp;&nbsp;&nbsp;';
+}
+echo '</div>';
 //echo $this->Form->file('evidence');
-//echo '</div>';
 ?>
+
 <div class="form-group">
     <span class="btn btn-default fileinput-button">
     <i class="glyphicon glyphicon-plus"></i>
@@ -160,6 +197,31 @@ foreach($sendersOptions as $key=>$value)
         }
     });
 
+    // remove evidences
+    $('.evidence-delete').click(function(event){
+        var id = $(this).attr('id');
+        var btnEvidence = '#evidence-' + id;
+        var url = '<?php echo $this->Url->build(['controller' => 'evidences', 'action' => 'delete'], true); ?>';
+        url = url + '/' + id;
+
+        // ajax call to /evidences/delete/:id
+        $.post(
+            url,
+            0,
+            function(data){
+                // if success, hide file button
+                if(data.result == 1) {
+                    $(btnEvidence).hide();
+                }
+            },
+            'json'
+        );
+
+        // prevent button to action
+        event.preventDefault();
+        event.stopPropagation();
+    });
+
     // upload file
     // first hide progress bar
     $('#parent').hide();
@@ -202,13 +264,5 @@ foreach($sendersOptions as $key=>$value)
 
     // simply validating form
     $('#letter').validator();
-    //$('#letter').validate({
-    //rules: {
-    //number: 'required',
-    //content: 'required',
-    //sender: 'required',
-    //date: 'required'
-    //}
-    //});
 });
 </script>

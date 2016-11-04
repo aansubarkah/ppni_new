@@ -78,7 +78,12 @@ class LettersController extends AppController
     public function view($id = null)
     {
         $letter = $this->Letters->get($id, [
-            'contain' => ['Senders', 'Users', 'Vias', 'Evidences', 'Dispositions']
+            'contain' => [
+                'Senders',
+                'Users',
+                'Vias',
+                'Evidences' => ['conditions' => ['Evidences.active' => 1]],
+                'Dispositions']
         ]);
 
         $breadcrumbs = $this->breadcrumbs;
@@ -132,11 +137,15 @@ class LettersController extends AppController
 
             $letter = $this->Letters->patchEntity($letter, $this->request->data);
             if ($this->Letters->save($letter)) {
-                $evidence = $this->Letters->Evidences->findById($evidence_id)->first();
-                $letter->evidences = [$evidence];
-                if ($this->Letters->save($letter)) {
-                    return $this->redirect(['action' => 'index']);
+                if (intval($evidence_id) != 0) {
+                    $evidence = $this->Letters->Evidences->findById($evidence_id)->first();
+                    $letter->evidences = [$evidence];
+                    if ($this->Letters->save($letter)) {
+                        //return $this->redirect(['action' => 'index']);
+                    }
                 }
+                return $this->redirect(['action' => 'index']);
+
                 //$this->Flash->success(__('The letter has been saved.'));
 
                 //return $this->redirect(['action' => 'index']);
@@ -180,6 +189,9 @@ class LettersController extends AppController
         $this->set('_serialize', ['letter']);
     }
 
+    /**
+    *
+    */
     private function getSenderId($name = null, $id = null)
     {
         $sender = $this->Letters->Senders->find('all', [
@@ -203,6 +215,7 @@ class LettersController extends AppController
         }
         return $sender_id;
     }
+
     /**
      * Edit method
      *
@@ -213,24 +226,111 @@ class LettersController extends AppController
     public function edit($id = null)
     {
         $letter = $this->Letters->get($id, [
-            'contain' => ['Evidences']
+            'contain' => [
+                'Evidences' => ['conditions' => ['Evidences.active' => 1]],
+                'Senders',
+                'Vias'
+            ]
         ]);
-        if ($this->request->is(['patch', 'post', 'put'])) {
-            $letter = $this->Letters->patchEntity($letter, $this->request->data);
-            if ($this->Letters->save($letter)) {
-                $this->Flash->success(__('The letter has been saved.'));
 
-                return $this->redirect(['action' => 'index']);
+        if ($this->request->is(['patch', 'post', 'put'])) {
+            // convert date to cakephp format
+            $date = new Date($this->request->data['date']);
+            $this->request->data['date'] = $date->format('Y-m-d');
+
+            // remove files, used by blueimp upload plugin on template form
+            unset($this->request->data['files']);
+
+            // move evidence_id from request data
+            $evidence_id = $this->request->data['evidence_id'];
+            unset($this->request->data['evidence_id']);
+
+            // check sender with id and name then unset sender name
+            $sender_id = $this->getSenderId(
+                $this->request->data['sender_name'],
+                $this->request->data['sender_id']
+            );
+            $this->request->data['sender_id'] = $sender_id;
+            unset($this->request->data['sender_name']);
+            unset($this->request->data['sender']);
+
+            // set the unset variable
+            $this->request->data['active'] = 1;
+            $this->request->data['user_id'] = $this->Auth->user('id');
+            $this->request->data['isread'] = 1;
+
+            $letter->sender_id = $sender_id;
+            $letter->user_id = $this->request->data['user_id'];
+            $letter->via_id = $this->request->data['via_id'];
+            $letter->number = $this->request->data['number'];
+            $letter->date = $this->request->data['date'];
+            $letter->content = $this->request->data['content'];
+            $letter->isread = 1;
+            $letter->active = 1;
+            if ($this->Letters->save($letter)) {
+                if (intval($evidence_id) != 0) {
+                    $evidence = $this->Letters->Evidences->findById($evidence_id)->first();
+                    $letter->evidences = [$evidence];
+                    $this->Letters->save($letter);
+                    //if ($this->Letters->save($letter)) {
+                        //return $this->redirect(['action' => 'index']);
+                    //}
+                }
+                return $this->redirect('/letters/view/' . $letter->id);
             } else {
                 $this->Flash->error(__('The letter could not be saved. Please, try again.'));
             }
         }
-        $senders = $this->Letters->Senders->find('list', ['limit' => 200]);
-        $users = $this->Letters->Users->find('list', ['limit' => 200]);
-        $vias = $this->Letters->Vias->find('list', ['limit' => 200]);
-        $evidences = $this->Letters->Evidences->find('list', ['limit' => 200]);
-        $this->set(compact('letter', 'senders', 'users', 'vias', 'evidences'));
+
+        // convert date to datepicker format
+        $date = new Date($letter->date);
+        $letter->date = $date->format('d-m-Y');
+
+        // convert senders to id -> name array
+        $senders = $this->Letters->Senders->find('all', [
+            'where' => ['active' => 1],
+            'order' => ['name' => 'ASC']
+        ]);
+        $sendersOptions = [];
+        foreach($senders as $sender)
+        {
+            $sendersOptions[$sender->id] = $sender->name;
+        }
+        $this->set('sendersOptions', $sendersOptions);
+
+        // convert via to cakephp-form-select-options
+        $vias = $this->Letters->Vias->find('all', [
+            'where' => ['active' => 1],
+            'order' => ['name' => 'ASC']
+        ]);
+        $viasOptions = [];
+        foreach($vias as $via)
+        {
+            $viasOptions[$via->id] = $via->name;
+        }
+        $this->set('viasOptions', $viasOptions);
+
+        $this->set(compact('letter', 'evidences'));
+        $this->set('title', $letter->number);
+        $breadcrumbs = $this->breadcrumbs;
+        array_push($breadcrumbs, [
+            'letters/view/' . $letter->id,
+            $letter->number
+        ]);
+        array_push($breadcrumbs, [
+            'letters',
+            'Ubah'
+        ]);
+        $this->set('breadcrumbs', $breadcrumbs);
+
         $this->set('_serialize', ['letter']);
+
+        //$senders = $this->Letters->Senders->find('list', ['limit' => 200]);
+        //$users = $this->Letters->Users->find('list', ['limit' => 200]);
+        //$vias = $this->Letters->Vias->find('list', ['limit' => 200]);
+        //$evidences = $this->Letters->Evidences->find('list', ['limit' => 200]);
+        //$this->set(compact('letter', 'senders', 'users', 'vias', 'evidences'));
+        //$this->set('_serialize', ['letter']);
     }
 
     /**

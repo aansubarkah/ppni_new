@@ -1,4 +1,11 @@
 <blockquote>
+    <span class="badge" id="letterDateBadge">
+<script>
+moment.locale('id');
+letterDate = moment('<?php echo $this->Time->format($letter['date'], 'yyyy-MM-dd HH:mm'); ?>').format('D MMMM YYYY');
+document.write(letterDate);
+</script>
+    </span>
     <h2><?php echo $letter['content']; ?></h2><br>
 <?php
 foreach($letter['evidences'] as $evidence) {
@@ -23,7 +30,7 @@ echo $this->Html->link(
     &nbsp;Diterima:&nbsp;
         <strong>
 <script>
-moment.locale('id');
+//moment.locale('id');
 letterDate = moment('<?php echo $this->Time->format($letter['created'], 'yyyy-MM-dd HH:mm'); ?>').format('D MMMM YYYY HH:mm');
 document.write(letterDate);
 </script>
