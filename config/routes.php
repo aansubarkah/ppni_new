@@ -56,6 +56,12 @@ Router::scope('/', function (RouteBuilder $routes) {
      */
     $routes->connect('/pages/*', ['controller' => 'Pages', 'action' => 'display']);
 
+    $routes->connect(
+        '/download/:id',
+        ['controller' => 'Evidences', 'action' => 'download'],
+        ['id' => '\d+', 'pass' => ['id']]
+    );
+
     $routes->extensions(['json']);
     /**
      * Connect catchall routes for all controllers.

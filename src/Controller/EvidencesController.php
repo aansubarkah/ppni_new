@@ -178,4 +178,29 @@ class EvidencesController extends AppController
             '_serialize' => ['result', 'evidence']
         ]);
     }
+
+    public function download($id = null)
+    {
+        $isRecordExists = $this->Evidences->exists(['id' => $id, 'active' => 1]);
+        if ($isRecordExists) {
+            $evidence = $this->Evidences->find('all', [
+                'conditions' => ['id' => $id, 'active' => 1]
+            ]);
+            $file = $evidence->first();
+
+            $path = $this->filesDirectory . $id . '.' . $file['extension'];
+
+            // create a cakephp file object
+            $existingFile = new File($path, false, 755);
+
+            // if exists on directory
+            if ($existingFile->exists()) {
+                $this->response->file(
+                    $path,
+                    ['download' => true, 'name' => str_replace(' ', '_', $file['name']) . '.' . $file['extension']]
+                );
+                return $this->response;
+            }
+        }
+    }
 }

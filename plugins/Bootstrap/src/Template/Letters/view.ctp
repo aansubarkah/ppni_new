@@ -4,7 +4,7 @@
 foreach($letter['evidences'] as $evidence) {
     echo $this->Html->link(
         '<i class="fa fa-file fa-fw"></i>&nbsp;' . $evidence['name'],
-        ['controller' => 'evidences', 'action' => 'download', $evidence['id']],
+        '/download/' . $evidence['id'],
         ['escape' => false]
     );
     echo '&nbsp;';
