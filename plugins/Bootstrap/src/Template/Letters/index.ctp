@@ -97,7 +97,7 @@ foreach($letters as $letter)
     echo $this->Html->link(
         '<i class="fa fa-trash fa-fw"></i>',
         ['controller' => 'Letters', 'action' => 'delete', $letter->id],
-        ['escape' => false]
+        ['escape' => false, 'confirm' => 'Ingin Menghapus Surat No ' . $letter->number . '?']
     );
 
 

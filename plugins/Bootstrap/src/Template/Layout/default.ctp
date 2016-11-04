@@ -282,7 +282,7 @@ if (isset($isShowEditButton))
     echo $this->Html->link(
         '<i class="fa fa-trash fa-fw"></i>',
         ['controller' => $this->name, 'action' => 'delete', $controllerObjectId],
-        ['escape' => false]
+        ['escape' => false, 'confirm' => 'Ingin Menghapus?']
     );
 
 }

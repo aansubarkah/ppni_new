@@ -36,6 +36,7 @@ class LettersController extends AppController
     public function index()
     {
         $query = $this->Letters->find('all', [
+            'conditions' => ['Letters.active' => 1],
             'contain' => ['Senders'],
             'limit' => $this->limit
         ]);
@@ -342,13 +343,15 @@ class LettersController extends AppController
      */
     public function delete($id = null)
     {
-        $this->request->allowMethod(['post', 'delete']);
+        //$this->request->allowMethod(['post', 'delete']);
         $letter = $this->Letters->get($id);
-        if ($this->Letters->delete($letter)) {
+        $letter->active = 0;
+        $this->Letters->save($letter);
+        /*if ($this->Letters->delete($letter)) {
             $this->Flash->success(__('The letter has been deleted.'));
         } else {
             $this->Flash->error(__('The letter could not be deleted. Please, try again.'));
-        }
+        }*/
 
         return $this->redirect(['action' => 'index']);
     }
