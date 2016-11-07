@@ -37,7 +37,7 @@ class LettersController extends AppController
     {
         $query = $this->Letters->find('all', [
             'conditions' => ['Letters.active' => 1],
-            'contain' => ['Senders'],
+            'contain' => ['Senders' => ['conditions' => ['Senders.active' => 1]]],
             'limit' => $this->limit
         ]);
         if ($this->request->query('search'))

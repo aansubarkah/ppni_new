@@ -10,6 +10,17 @@ use App\Controller\AppController;
  */
 class SendersController extends AppController
 {
+    public $limit = 5;
+
+    /*
+     * breadcrumbs variable, format like
+     * [['link 1', 'link title 1'], ['link 2', 'link title 2']]
+     *
+     * */
+    public $breadcrumbs = [
+        ['senders', 'Pengirim']
+    ];
+
 
     /**
      * Index method
@@ -18,8 +29,31 @@ class SendersController extends AppController
      */
     public function index()
     {
-        $senders = $this->paginate($this->Senders);
+        $query = $this->Senders->find('all', [
+            'conditions' => ['Senders.active' => 1],
+            'limit' => $this->limit
+        ]);
+        if ($this->request->query('search'))
+        {
+            $query->where(['name LIKE' => '%' . $this->request->query('search') . '%']);
+        }
+        if ($this->request->query('sort'))
+        {
+            $query->order([
+                $this->request->query('sort') => $this->request->query('direction')
+            ]);
+        } else {
+            $query->order(['name' => 'ASC']);
+        }
+        $this->paginate = ['limit' => $this->limit];
 
+        $breadcrumbs = $this->breadcrumbs;
+        $this->set('breadcrumbs', $breadcrumbs);
+
+        $senders = $this->paginate($query);
+        $this->set('title', 'Pengirim');
+        $this->set('limit', $this->limit);
+        //$this->set('isShowAddButton', true);
         $this->set(compact('senders'));
         $this->set('_serialize', ['senders']);
     }
@@ -33,12 +67,46 @@ class SendersController extends AppController
      */
     public function view($id = null)
     {
-        $sender = $this->Senders->get($id, [
-            'contain' => ['Letters']
-        ]);
+        $sender = $this->Senders->get($id);
 
+        $breadcrumbs = $this->breadcrumbs;
+        array_push($breadcrumbs, [
+            'view/' . $sender['id'],
+            $sender['name']
+        ]);
+        $this->set('breadcrumbs', $breadcrumbs);
+
+        $this->set('isShowEditButton', true);
+
+        $this->set('controllerObjectId', $id);
+
+        $this->set('title', $sender['name']);
         $this->set('sender', $sender);
         $this->set('_serialize', ['sender']);
+
+        $query = $this->Senders->Letters->find('all', [
+            'conditions' => ['Letters.active' => 1, 'Letters.sender_id' => $id],
+            'limit' => $this->limit
+        ]);
+        if ($this->request->query('search'))
+        {
+            $query->where(['content LIKE' => '%' . $this->request->query('search') . '%']);
+        }
+        if ($this->request->query('sort'))
+        {
+            $query->order([
+                $this->request->query('sort') => $this->request->query('direction')
+            ]);
+        } else {
+            $query->order(['date' => 'DESC']);
+        }
+        $this->paginate = ['limit' => $this->limit];
+
+        $letters = $this->paginate($query);
+        $this->set('limit', $this->limit);
+        $this->set(compact('letters'));
+        $this->set('_serialize', ['letters']);
+
     }
 
     /**
@@ -85,6 +153,18 @@ class SendersController extends AppController
                 $this->Flash->error(__('The sender could not be saved. Please, try again.'));
             }
         }
+        $this->set('title', $sender->name);
+        $breadcrumbs = $this->breadcrumbs;
+        array_push($breadcrumbs, [
+            'senders/view/' . $sender->id,
+            $sender->name
+        ]);
+        array_push($breadcrumbs, [
+            'senders',
+            'Ubah'
+        ]);
+        $this->set('breadcrumbs', $breadcrumbs);
+
         $this->set(compact('sender'));
         $this->set('_serialize', ['sender']);
     }
@@ -98,14 +178,34 @@ class SendersController extends AppController
      */
     public function delete($id = null)
     {
-        $this->request->allowMethod(['post', 'delete']);
+        //$this->request->allowMethod(['post', 'delete']);
         $sender = $this->Senders->get($id);
-        if ($this->Senders->delete($sender)) {
+        $sender->active = 0;
+        $this->Senders->save($sender);
+        /*if ($this->Senders->delete($sender)) {
             $this->Flash->success(__('The sender has been deleted.'));
         } else {
             $this->Flash->error(__('The sender could not be deleted. Please, try again.'));
-        }
+        }*/
 
         return $this->redirect(['action' => 'index']);
+    }
+
+    public function isAuthorized($user)
+    {
+        // All registered users can add, edit, delete
+        if ($this->request->action === 'add' ||
+            $this->request->action === 'edit' ||
+            $this->request->action === 'delete') {
+            return true;
+        }
+
+        //
+        return parent::isAuthorized($user);
+    }
+
+    public function beforeRender(\Cake\Event\Event $event)
+    {
+        $this->viewBuilder()->theme('Bootstrap');
     }
 }
