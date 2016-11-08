@@ -66,8 +66,9 @@ class DepartementsUsersTable extends Table
 
         $validator
             ->date('end')
-            ->requirePresence('end', 'create')
-            ->notEmpty('end');
+            ->allowEmpty('end', 'create');
+            //->requirePresence('end', 'create')
+            //->notEmpty('end');
 
         $validator
             ->boolean('active')

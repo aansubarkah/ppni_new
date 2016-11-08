@@ -12,6 +12,7 @@ use Cake\Auth\DefaultPasswordHasher;
  * @property string $username
  * @property string $password
  * @property string $fullname
+ * @property string $email
  * @property bool $active
  *
  * @property \App\Model\Entity\Group $group

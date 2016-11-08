@@ -84,7 +84,15 @@ class LettersController extends AppController
                 'Users',
                 'Vias',
                 'Evidences' => ['conditions' => ['Evidences.active' => 1]],
-                'Dispositions']
+            ]
+        ]);
+
+        $dispositions = $this->Letters->Dispositions->find('all', [
+            'conditions' => ['Dispositions.letter_id' => $id, 'Dispositions.active' => 1],
+            'order' => ['Dispositions.created' => 'ASC'],
+            'contain' => [
+                'Users', 'Recipients'
+            ]
         ]);
 
         $breadcrumbs = $this->breadcrumbs;
@@ -100,7 +108,8 @@ class LettersController extends AppController
 
         $this->set('title', $letter['number']);
         $this->set('letter', $letter);
-        $this->set('_serialize', ['letter']);
+        $this->set('dispositions', $dispositions);
+        $this->set('_serialize', ['letter', 'dispositions']);
     }
 
     /**

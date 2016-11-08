@@ -32,7 +32,7 @@ class RecipientsTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('recipients');
+        $this->table('users');
 
         $this->hasMany('Dispositions', [
             'foreignKey' => 'recipient_id'
@@ -49,8 +49,7 @@ class RecipientsTable extends Table
     {
         $validator
             ->integer('id')
-            ->requirePresence('id', 'create')
-            ->notEmpty('id');
+            ->allowEmpty('id', 'create');
 
         $validator
             ->requirePresence('username', 'create')
@@ -59,6 +58,10 @@ class RecipientsTable extends Table
         $validator
             ->requirePresence('fullname', 'create')
             ->notEmpty('fullname');
+
+        $validator
+            ->string('email')
+            ->allowEmpty();
 
         $validator
             ->boolean('active')

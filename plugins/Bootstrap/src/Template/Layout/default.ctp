@@ -197,7 +197,14 @@ echo $this->Html->link(
 );
 ?>
                         <li>
-                            <a href="#"><i class="fa fa-sitemap fa-fw"></i> Organisasi</a>
+<?php
+echo $this->Html->link(
+    '<i class="fa fa-sitemap fa-fw"></i> Organisasi',
+    ['controller' => 'departements',
+    'action' => 'index'],
+    ['escape' => false]
+);
+?>
                         </li>
                     </ul>
                 </div>

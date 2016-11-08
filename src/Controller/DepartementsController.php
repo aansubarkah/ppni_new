@@ -11,6 +11,15 @@ use App\Controller\AppController;
 class DepartementsController extends AppController
 {
 
+    /*
+     * breadcrumbs variable, format like
+     * [['link 1', 'link title 1'], ['link 2', 'link title 2']]
+     *
+     * */
+    public $breadcrumbs = [
+        ['senders', 'Pengirim']
+    ];
+
     /**
      * Index method
      *
@@ -18,10 +27,15 @@ class DepartementsController extends AppController
      */
     public function index()
     {
-        $this->paginate = [
-            'contain' => ['ParentDepartements']
-        ];
-        $departements = $this->paginate($this->Departements);
+        $departements = $this->Departements
+            ->find('children', ['for' => 1])
+            ->find('threaded')
+            ->toArray();
+
+        $breadcrumbs = $this->breadcrumbs;
+        $this->set('breadcrumbs', $breadcrumbs);
+
+        $this->set('title', 'Organisasi');
 
         $this->set(compact('departements'));
         $this->set('_serialize', ['departements']);
@@ -114,5 +128,23 @@ class DepartementsController extends AppController
         }
 
         return $this->redirect(['action' => 'index']);
+    }
+
+    public function isAuthorized($user)
+    {
+        // All registered users can add, edit, delete
+        if ($this->request->action === 'add' ||
+            $this->request->action === 'edit' ||
+            $this->request->action === 'delete') {
+            return true;
+        }
+
+        //
+        return parent::isAuthorized($user);
+    }
+
+    public function beforeRender(\Cake\Event\Event $event)
+    {
+        $this->viewBuilder()->theme('Bootstrap');
     }
 }

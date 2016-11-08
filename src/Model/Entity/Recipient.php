@@ -9,6 +9,7 @@ use Cake\ORM\Entity;
  * @property int $id
  * @property string $username
  * @property string $fullname
+ * @property string $email
  * @property bool $active
  *
  * @property \App\Model\Entity\Disposition[] $dispositions
