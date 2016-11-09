@@ -200,7 +200,17 @@ class DispositionsController extends AppController
      */
     public function delete($id = null)
     {
-        $this->request->allowMethod(['post', 'delete']);
+        $disposition = $this->Dispositions->get($id);
+        $disposition->active = 0;
+        $this->Dispositions->save($disposition);
+
+        return $this->redirect([
+            'controller' => 'letters',
+            'action' => 'view',
+            $disposition['letter_id']
+        ]);
+
+        /*$this->request->allowMethod(['post', 'delete']);
         $disposition = $this->Dispositions->get($id);
         if ($this->Dispositions->delete($disposition)) {
             $this->Flash->success(__('The disposition has been deleted.'));
@@ -208,7 +218,7 @@ class DispositionsController extends AppController
             $this->Flash->error(__('The disposition could not be deleted. Please, try again.'));
         }
 
-        return $this->redirect(['action' => 'index']);
+        return $this->redirect(['action' => 'index']);*/
     }
 
     public function isAuthorized($user)

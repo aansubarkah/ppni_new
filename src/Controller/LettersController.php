@@ -112,6 +112,11 @@ class LettersController extends AppController
         $this->set('title', $letter['number']);
         $this->set('letter', $letter);
         $this->set('dispositions', $dispositions);
+
+        // if current viewer login
+        $this->Auth->user() ? $currentUserId = $this->Auth->user('id') : $currentUserId = 0;
+        $this->set('currentUserId', $currentUserId);
+
         $this->set('_serialize', ['letter', 'dispositions']);
     }
 
