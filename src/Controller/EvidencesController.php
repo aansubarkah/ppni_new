@@ -169,8 +169,14 @@ class EvidencesController extends AppController
             'print_response' => false
         );
 
+        // get file name
+        if ($this->request->data('filename') != NULL) {
+            $filename = $this->request->data('filename');
+        } else {
+            $filename = 'Berkas';
+        }
         $result = $this->JqueryFileUpload->upload($options);
-        $evidence_id = $this->add($result['files'][0]->name, 'Surat Masuk');
+        $evidence_id = $this->add($result['files'][0]->name, $filename);
         $evidence = ['id' => $evidence_id];
 
         $this->set([

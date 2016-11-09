@@ -73,12 +73,13 @@ class DispositionsController extends AppController
             ]);
             $disposition = $this->Dispositions->newEntity();
             if ($this->request->is('post')) {
+                intval($this->request->data['parent_id']) == 0 ? $parent_id = NULL : $parent_id = $this->request->data['parent_id'];
+                $evidence_id = intval($this->request->data['evidence_id']);
+
                 // first get how many recipients
                 $recipients = explode(",", $this->request->data['recipients']);
-                //print_r($recipients);
                 foreach ($recipients as $recipient) {
                     $newDisposition = $disposition;
-                    //print($recipient);
                     // get user on recipient departement
                     $usersOnRecipient = $this->Dispositions->Users->find('all', [
                         'conditions' => ['Users.active' => 1]
@@ -90,8 +91,7 @@ class DispositionsController extends AppController
                     // foreach user
                     foreach ($usersOnRecipient as $user) {
                         $newDisposition = $this->Dispositions->newEntity();
-                        //print_r($user);
-                        $newDisposition->parent_id = NULL;
+                        $newDisposition->parent_id = $parent_id;
                         $newDisposition->letter_id = intval($this->request->data['letter_id']);
                         $newDisposition->user_id = $this->Auth->user('id');
                         $newDisposition->recipient_id = $user['id'];
@@ -99,36 +99,35 @@ class DispositionsController extends AppController
                         $newDisposition->isread = 0;
                         $newDisposition->finish = 0;
                         $newDisposition->active = 1;
-                        $this->Dispositions->save($newDisposition);
-                        //print_r($newDisposition);
-                        //$this->Dispositions->patchEntity($disposition);
-                        /*if ($this->Dispositions->save($newDisposition, ['atomic' => false])) {
-                            print_r($newDisposition);
-                        } else {
-                            print_r($newDisposition->errors());
-                        }*/
+                        if ($this->Dispositions->save($newDisposition)) {
+                            if ($evidence_id > 0) {
+                                $evidence = $this->Dispositions->Evidences->findById($evidence_id)->first();
+                                $newDisposition->evidences = [$evidence];
+                                $this->Dispositions->save($newDisposition);
+                            }
+                        }
                     }
                 }
 
+                // if saving success
                 return $this->redirect('/letters/view/' . $this->request->data['letter_id']);
-
-                //print_r($this->request->data);
-                /*$disposition = $this->Dispositions->patchEntity($disposition, $this->request->data);
-                if ($this->Dispositions->save($disposition)) {
-                    $this->Flash->success(__('The disposition has been saved.'));
-
-                    return $this->redirect(['action' => 'index']);
-                } else {
-                    $this->Flash->error(__('The disposition could not be saved. Please, try again.'));
-                }*/
             }
 
-            // only display departements with users exists
+            // only display departements with users exists and not active user departement
+            // first get current user's departement
+            $userDepartement = $this->Dispositions->Users->find('all', [
+                'conditions' => ['Users.id' => $this->Auth->user('id')],
+                'contain' => ['Departements']
+            ])->first();
+            // if user have departement use it, if not, use departement 1 which is PPNI Jatim
+            count($userDepartement['departements']) > 0 ? $departement_to_avoid = $userDepartement['departements'][0]['id'] : $departement_to_avoid = 1;
+            //print_r($userDepartement['departements'][0]['id']);
             $departements = $this->Dispositions->Users->Departements
                 ->find('all', [
                     'conditions' => [
                         'Departements.active' => 1,
-                        'NOT' => ['Departements.parent_id' => 0]
+                        'Departements.parent_id !=' => 0,
+                        'Departements.id !=' => $departement_to_avoid
                     ],
                     'order' => ['name' => 'ASC']
                 ])

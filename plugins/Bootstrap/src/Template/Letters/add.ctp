@@ -169,6 +169,7 @@ foreach($sendersOptions as $key=>$value)
     // don't forget to setup max_file_size value on php.ini
     $('#fileupload').fileupload({
         dataType: 'json',
+        formData: {filename: 'Surat Masuk'},
         url: '/evidences/upload',
         add: function (e, data) {
             $('#progress').show();

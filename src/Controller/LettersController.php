@@ -91,7 +91,7 @@ class LettersController extends AppController
             'conditions' => ['Dispositions.letter_id' => $id, 'Dispositions.active' => 1],
             'order' => ['Dispositions.created' => 'ASC'],
             'contain' => [
-                'Users', 'Recipients'
+                'Users', 'Recipients', 'Evidences'
             ]
         ]);
 
@@ -105,6 +105,9 @@ class LettersController extends AppController
         $this->set('isShowEditButton', true);
 
         $this->set('controllerObjectId', $id);
+
+        $this->request->is('mobile') ? $isMobile = true : $isMobile = false;
+        $this->set('isMobile', $isMobile);
 
         $this->set('title', $letter['number']);
         $this->set('letter', $letter);
