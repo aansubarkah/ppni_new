@@ -150,23 +150,33 @@ echo $this->Html->link(
                         <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-user">
-                        <li><a href="#"><i class="fa fa-user fa-fw"></i> User Profile</a>
-                        </li>
-                        <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
-                        </li>
-                        <li class="divider"></li>
-                        <li>
 <?php
-echo $this->Html->link(
-    '<i class="fa fa-sign-out fa-fw"></i> Logout',
-    [
-        'controller' => 'users',
-        'action' => 'logout'
-    ],
-    ['escape' => false]
-);
+if (isset($user)) {
+    echo '<li>';
+    echo $this->Html->link(
+        '<i class="fa fa-user fa-fw"></i>&nbsp;User Profile',
+        ['controller' => 'users', 'action' => 'profile'],
+        ['escape' => false]
+    );
+    echo '</li>';
+    echo '<li class="divider"></li>';
+    echo '<li>';
+    echo $this->Html->link(
+        '<i class="fa fa-sign-out fa-fw"></i>&nbsp;Logout',
+        ['controller' => 'users', 'action' => 'logout'],
+        ['escape' => false]
+    );
+    echo '</li>';
+} else {
+    echo '<li>';
+    echo $this->Html->link(
+        '<i class="fa fa-sign-in fa-fw"></i>&nbsp;Login',
+        ['controller' => 'users', 'action' => 'login'],
+        ['escape' => false]
+    );
+    echo '</li>';
+}
 ?>
-                        </li>
                     </ul>
                     <!-- /.dropdown-user -->
                 </li>

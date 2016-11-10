@@ -8,10 +8,9 @@ $(function(){
 });
 </script>
 <blockquote>
-    <span class="badge" id="letterDateBadge"></span>
+    <span class="label label-default" id="letterDateBadge"></span>
     <h2><?php echo $letter['content']; ?></h2><br>
 <?php
-echo $currentUserId;
 foreach($letter['evidences'] as $evidence) {
     echo $this->Html->link(
         '<i class="fa fa-file fa-fw"></i>&nbsp;' . $evidence['name'] . '&nbsp;(' . $evidence['extension'] . ')',
@@ -62,7 +61,7 @@ if (count($dispositions) > 0)
     foreach ($dispositions as $disposition) {
         if ($index%2 == 0) {
             echo '<li>';
-            echo '<div class="timeline-badge info">';
+            echo '<div class="timeline-badge primary">';
             echo '<i class="fa fa-archive"></i>';
         } else {
             echo '<li class="timeline-inverted">';

@@ -30,81 +30,21 @@ echo $this->Html->link(
     </footer>
 </blockquote>
 <?php
-if (isset($parent)) {
-?>
-<blockquote>
-<span class="label label-default" id="dispositionDateBadge"></span>
-    <span class="label label-warning">Disposisi</span>
-    <h2><?php echo $parent['content']; ?></h2><br>
-<?php
-foreach($parent['evidences'] as $evidence) {
-    echo $this->Html->link(
-        '<i class="fa fa-file fa-fw"></i>&nbsp;' . $evidence['name'] . '&nbsp;(' . $evidence['extension'] . ')',
-        '/download/' . $evidence['id'],
-        ['escape' => false]
-    );
-    echo '&nbsp;';
-}
-?>
-    <footer>
-        Pengirim:&nbsp;
-<?php
-echo $parent['user']['fullname'];
-?>
-    </footer>
-</blockquote>
-<?php
-}
-?>
-<?php
 echo $this->Form->create($disposition, [
     'id' => 'disposition',
     'data-toggle' => 'validator'
 ]);
 
 echo '<div class="form-group">';
-/*echo $this->Form->select('recipients',
-    $departementsOptions,[
-        'multiple',
-        'data-role' => 'tagsinput',
-        'id' => 'recipients'
-    ]);*/
-if (isset($parent)) {
-    echo $this->Form->text('recipient', [
-        'label' => false,
-        'class' => 'form-control',
-        'placeholder' => $parentDepartement[0]['name'],
-        'id' => 'sender',
-        'required',
-        'data-error' => 'Kepada harus diisi',
-        'value' => $parentDepartement[0]['name'],
-        'disabled'
-    ]);
-    echo $this->Form->hidden('recipients', [
-        'id' => 'sender',
-        'value' => $parentDepartement[0]['id']
-    ]);
-} else {
-    echo $this->Form->text('recipients', [
-        'label' => false,
-        'class' => 'form-control typeahead',
-        'placeholder' => 'Kepada',
-        'autocomplete' => 'off',
-        'id' => 'sender',
-        'required',
-        'data-error' => 'Kepada harus diisi'
-    ]);
-}
-echo $this->Form->hidden('letter_id', [
-    'id' => 'letter_id',
-    'value' => $letter_id
+echo $this->Form->text('recipients', [
+    'label' => false,
+    'class' => 'form-control typeahead',
+    'placeholder' => 'Kepada',
+    'autocomplete' => 'off',
+    'id' => 'sender',
+    'required',
+    'data-error' => 'Kepada harus diisi'
 ]);
-
-echo $this->Form->hidden('parent_id', [
-    'id' => 'parent_id',
-    'value' => $parent_id
-]);
-
 echo '</div>';
 
 echo '<div class="form-group">';
@@ -251,14 +191,6 @@ foreach($departementsOptions as $key=>$value)
     moment.locale('id');
     letterDate = moment('<?php echo $this->Time->format($letter['date'], 'yyyy-MM-dd HH:mm'); ?>').format('D MMMM YYYY');
     $('#letterDateBadge').text(letterDate);
-<?php
-if (isset($parent)) {
-?>
-    dispositionDate = moment('<?php echo $this->Time->format($parent['created'], 'yyyy-MM-dd HH:mm'); ?>').format('D MMMM YYYY HH:mm');
-    $('#dispositionDateBadge').text(dispositionDate);
-<?php
-}
-?>
 });
 </script>
 <style>

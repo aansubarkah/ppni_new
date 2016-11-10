@@ -142,9 +142,4 @@ class DepartementsController extends AppController
         //
         return parent::isAuthorized($user);
     }
-
-    public function beforeRender(\Cake\Event\Event $event)
-    {
-        $this->viewBuilder()->theme('Bootstrap');
-    }
 }

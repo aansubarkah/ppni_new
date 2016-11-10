@@ -69,11 +69,16 @@ class AppController extends Controller
         ) {
             $this->set('_serialize', true);
         }
+        $this->viewBuilder()->theme('Bootstrap');
+
+        $this->set('user', $this->Auth->user());
     }
 
     public function beforeFilter(Event $event)
     {
         $this->Auth->allow(['index', 'view', 'display']);
+        $this->request->is('mobile') ? $isMobile = true : $isMobile = false;
+        $this->set('isMobile', $isMobile);
     }
 
     public function isAuthorized($user)

@@ -106,8 +106,8 @@ class LettersController extends AppController
 
         $this->set('controllerObjectId', $id);
 
-        $this->request->is('mobile') ? $isMobile = true : $isMobile = false;
-        $this->set('isMobile', $isMobile);
+        //$this->request->is('mobile') ? $isMobile = true : $isMobile = false;
+        //$this->set('isMobile', $isMobile);
 
         $this->set('title', $letter['number']);
         $this->set('letter', $letter);
@@ -384,9 +384,9 @@ class LettersController extends AppController
         return parent::isAuthorized($user);
     }
 
-    public function beforeRender(\Cake\Event\Event $event)
-    {
-        $this->viewBuilder()->theme('Bootstrap');
-    }
+    //public function beforeRender(\Cake\Event\Event $event)
+    //{
+        //$this->viewBuilder()->theme('Bootstrap');
+    //}
 
 }

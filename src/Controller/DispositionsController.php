@@ -153,6 +153,20 @@ class DispositionsController extends AppController
             empty($parent_id) ? $parent = 0 : $parent = $parent_id;
             $this->set('parent_id', $parent);
 
+            // get parent disposition, if exists
+            if ($parent_id > 0) {
+                $parent = $this->Dispositions->get($parent_id,
+                    ['contain' => ['Evidences', 'Users']]);
+
+                $parentDepartement = $this->Dispositions->Users->find('all', [
+                    'conditions' => ['Users.id' => $parent['user_id']],
+                    'contain' => ['Departements']
+                ])->first();
+
+                $this->set('parent', $parent);
+                $this->set('parentDepartement', $parentDepartement['departements']);
+            }
+
             $this->set(compact('disposition', 'departementsOptions', 'letter'));
             $this->set('_serialize', ['disposition', 'departementsOptions', 'letter']);
         } else {
@@ -182,13 +196,50 @@ class DispositionsController extends AppController
                 $this->Flash->error(__('The disposition could not be saved. Please, try again.'));
             }
         }
-        $parentDispositions = $this->Dispositions->ParentDispositions->find('list', ['limit' => 200]);
-        $letters = $this->Dispositions->Letters->find('list', ['limit' => 200]);
-        $users = $this->Dispositions->Users->find('list', ['limit' => 200]);
-        $recipients = $this->Dispositions->Recipients->find('list', ['limit' => 200]);
-        $evidences = $this->Dispositions->Evidences->find('list', ['limit' => 200]);
-        $this->set(compact('disposition', 'parentDispositions', 'letters', 'users', 'recipients', 'evidences'));
-        $this->set('_serialize', ['disposition']);
+
+        $letter = $this->Dispositions->Letters->get($disposition['letter_id'], [
+            'contain' => ['Evidences', 'Senders']
+        ]);
+        // only display departements with users exists and not active user departement
+        // first get current user's departement
+        $userDepartement = $this->Dispositions->Users->find('all', [
+            'conditions' => ['Users.id' => $this->Auth->user('id')],
+            'contain' => ['Departements']
+        ])->first();
+        // if user have departement use it, if not, use departement 1 which is PPNI Jatim
+        count($userDepartement['departements']) > 0 ? $departement_to_avoid = $userDepartement['departements'][0]['id'] : $departement_to_avoid = 1;
+        //print_r($userDepartement['departements'][0]['id']);
+        $departements = $this->Dispositions->Users->Departements
+            ->find('all', [
+                'conditions' => [
+                    'Departements.active' => 1,
+                    'Departements.parent_id !=' => 0,
+                    'Departements.id !=' => $departement_to_avoid
+                ],
+                'order' => ['name' => 'ASC']
+            ])
+            ->matching('Users', function($q) {
+                return $q->where(['Users.active' => 1]);
+            });
+        $departementsOptions = [];
+        foreach ($departements as $departement) {
+            $departementsOptions[$departement->id] = $departement->name;
+        }
+
+        $this->set('title', 'Disposisi Surat Masuk ' . $letter['number']);
+        $breadcrumbs = $this->breadcrumbs;
+        array_push($breadcrumbs, [
+            'letters/view/' . $letter['id'],
+            $letter['number']
+        ]);
+        array_push($breadcrumbs, [
+            'dispositions/edit',
+            'Ubah'
+        ]);
+        $this->set('breadcrumbs', $breadcrumbs);
+
+        $this->set(compact('disposition', 'departementsOptions', 'letter'));
+        $this->set('_serialize', ['disposition', 'departementsOptions', 'letter']);
     }
 
     /**
@@ -232,10 +283,5 @@ class DispositionsController extends AppController
 
         //
         return parent::isAuthorized($user);
-    }
-
-    public function beforeRender(\Cake\Event\Event $event)
-    {
-        $this->viewBuilder()->theme('Bootstrap');
     }
 }
