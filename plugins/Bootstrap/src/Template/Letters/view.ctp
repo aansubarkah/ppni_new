@@ -84,7 +84,6 @@ if (count($dispositions) > 0)
                 ['controller' => 'dispositions', 'action' => 'delete', $disposition['id']],
                 ['escape' => false, 'confirm' => 'Ingin Menghapus?']
             );
-
         }
 
         echo '</p>';//timeline-title
@@ -118,19 +117,20 @@ if (count($dispositions) > 0)
             }
             echo '</span>';
         }
-        //print_r($disposition);
-        echo '<span class="pull-right"><small>';
-        echo $this->Html->link(
-            '<i class="fa fa-briefcase fa-fw"></i>&nbsp;' . 'Tindak Lanjuti',
-            [
-                'controller' => 'dispositions',
-                'action' => 'add',
-                $letter['id'],
-                $disposition['id']
-            ],
-            ['escape' => false]
-        );
-        echo '</small></span>';//span
+        if ($currentUserId == $disposition['recipient_id']) {
+            echo '<span class="pull-right"><small>';
+            echo $this->Html->link(
+                '<i class="fa fa-briefcase fa-fw"></i>&nbsp;' . 'Tindak Lanjuti',
+                [
+                    'controller' => 'dispositions',
+                    'action' => 'add',
+                    $letter['id'],
+                    $disposition['id']
+                ],
+                ['escape' => false]
+            );
+            echo '</small></span>';//span
+        }
         echo '</div>';//timeline-body
         echo '</div>';//timeline-panel
         echo '</li>';
