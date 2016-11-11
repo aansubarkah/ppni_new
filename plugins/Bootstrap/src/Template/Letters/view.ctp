@@ -41,11 +41,13 @@ echo $this->Html->link(
         <h3 class="panel-title">
             Disposisi&nbsp;
 <?php
-echo $this->Html->link(
-    '<i class="fa fa-edit fa-fw text-primary"></i>',
-    ['controller' => 'dispositions', 'action' => 'add', $letter['id']],
-    ['escape' => false]
-);
+if (isset($isCurrentUserHaveDepartement)) {
+    echo $this->Html->link(
+        '<i class="fa fa-edit fa-fw text-primary"></i>',
+        ['controller' => 'dispositions', 'action' => 'add', $letter['id']],
+        ['escape' => false]
+    );
+}
 ?>
         </h3>
     </div>
@@ -72,7 +74,20 @@ if (count($dispositions) > 0)
         echo '<div class="timeline-panel">';
         echo '<div class="timeline-heading">';
         echo '<p class="text-info">';
-        echo $disposition['user']['fullname'];
+        echo '<span class="text-info">';
+
+        $dispositionLink = '<i class="fa fa-user-md fa-fw"></i>';
+        $dispositionLink = $dispositionLink . '&nbsp;&nbsp;';
+        $dispositionLink = $dispositionLink . $disposition['user']['fullname'];
+        $dispositionLink = $dispositionLink . '&nbsp;&nbsp;';
+        $dispositionLink = $dispositionLink . '<i class="fa fa-random fa-fw"></i>';
+        $dispositionLink = $dispositionLink . '&nbsp;&nbsp;';
+        $dispositionLink = $dispositionLink . $disposition['recipient']['fullname'];
+        echo $this->Html->link($dispositionLink,
+            ['controller' => 'dispositions', 'action' => 'view', $disposition['id']],
+            ['escape' => false]
+        );
+
         if ($currentUserId == $disposition['user']['id']) {
             echo $this->Html->link(
                 '<i class="fa fa-pencil fa-fw"></i>',
@@ -85,13 +100,9 @@ if (count($dispositions) > 0)
                 ['escape' => false, 'confirm' => 'Ingin Menghapus?']
             );
         }
-
         echo '</p>';//timeline-title
         echo '<p>';
         echo '<small class="text-muted">';
-        echo 'Kepada:&nbsp;';
-        echo '<strong>' . $disposition['recipient']['fullname'] . '</strong>';
-        echo '&nbsp;Dibuat:&nbsp;';
         echo '<strong>';
 ?>
         <script>

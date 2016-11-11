@@ -45,11 +45,35 @@ class DispositionsController extends AppController
     public function view($id = null)
     {
         $disposition = $this->Dispositions->get($id, [
-            'contain' => ['ParentDispositions', 'Letters', 'Users', 'Recipients', 'Evidences', 'ChildDispositions']
+            'contain' => [
+                'ParentDispositions',
+                'Users',
+                'Recipients',
+                'Evidences',
+                'ChildDispositions']
         ]);
 
+        $letter = $this->Dispositions->Letters->get($disposition['letter_id'], [
+            'contain' => [
+                'Evidences',
+                'Users',
+                'Senders',
+                'Vias'
+            ]
+        ]);
+
+        $this->set('title', 'Disposisi');
+        $breadcrumbs = $this->breadcrumbs;
+        array_push($breadcrumbs, [
+            'dispositions/add',
+            'Rinci'
+        ]);
+
+        $this->set('breadcrumbs', $breadcrumbs);
+
         $this->set('disposition', $disposition);
-        $this->set('_serialize', ['disposition']);
+        $this->set('letter', $letter);
+        $this->set('_serialize', ['disposition', 'letter']);
     }
 
     /**
@@ -186,60 +210,83 @@ class DispositionsController extends AppController
         $disposition = $this->Dispositions->get($id, [
             'contain' => ['Evidences']
         ]);
-        if ($this->request->is(['patch', 'post', 'put'])) {
-            $disposition = $this->Dispositions->patchEntity($disposition, $this->request->data);
-            if ($this->Dispositions->save($disposition)) {
-                $this->Flash->success(__('The disposition has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
-            } else {
-                $this->Flash->error(__('The disposition could not be saved. Please, try again.'));
+        if ($this->Auth->user('id') == $disposition['user_id']) {
+            if ($this->request->is(['patch', 'post', 'put'])) {
+                //print_r($this->request->data);
+                unset($this->request->data['recipients']);
+                unset($this->request->data['files']);
+                $disposition = $this->Dispositions->patchEntity($disposition, $this->request->data);
+                if ($this->Dispositions->save($disposition)) {
+                    if ($this->request->data['evidence_id'] > 0) {
+                        $evidence = $this->Dispositions->Evidences->findById($this->request->data['evidence_id'])->first();
+                        $disposition->evidences = [$evidence];
+                        $this->Dispositions->save($disposition);
+                    }
+                    return $this->redirect([
+                        'controller' => 'letters',
+                        'action' => 'view', $disposition->letter_id]);
+                } else {
+                    $this->Flash->error(__('The disposition could not be saved. Please, try again.'));
+                }
             }
+
+            $letter = $this->Dispositions->Letters->get($disposition['letter_id'], [
+                'contain' => ['Evidences', 'Senders']
+            ]);
+            // only display departements with users exists and not active user departement
+            // first get current user's departement
+            $userDepartement = $this->Dispositions->Users->find('all', [
+                'conditions' => ['Users.id' => $this->Auth->user('id')],
+                'contain' => ['Departements']
+            ])->first();
+            // if user have departement use it, if not, use departement 1 which is PPNI Jatim
+            count($userDepartement['departements']) > 0 ? $departement_to_avoid = $userDepartement['departements'][0]['id'] : $departement_to_avoid = 1;
+            //print_r($userDepartement['departements'][0]['id']);
+            $departements = $this->Dispositions->Users->Departements
+                ->find('all', [
+                    'conditions' => [
+                        'Departements.active' => 1,
+                        'Departements.parent_id !=' => 0,
+                        'Departements.id !=' => $departement_to_avoid
+                    ],
+                    'order' => ['name' => 'ASC']
+                ])
+                ->matching('Users', function($q) {
+                    return $q->where(['Users.active' => 1]);
+                });
+            $departementsOptions = [];
+            foreach ($departements as $departement) {
+                $departementsOptions[$departement->id] = $departement->name;
+            }
+
+            // get last recipients's departements
+            $recipientDepartement = $this->Dispositions->Users->find('all', [
+                'conditions' => ['Users.id' => $disposition['recipient_id']],
+                'contain' => ['Departements']
+            ])->first();
+            $this->set('recipientDepartement', $recipientDepartement['departements']);
+
+            $this->set('title', 'Disposisi Surat Masuk ' . $letter['number']);
+            $breadcrumbs = $this->breadcrumbs;
+            array_push($breadcrumbs, [
+                'letters/view/' . $letter['id'],
+                $letter['number']
+            ]);
+            array_push($breadcrumbs, [
+                'dispositions/edit',
+                'Ubah'
+            ]);
+            $this->set('breadcrumbs', $breadcrumbs);
+
+            $this->set(compact('disposition', 'departementsOptions', 'letter'));
+            $this->set('_serialize', ['disposition', 'departementsOptions', 'letter']);
+        } else {
+            return $this->redirect([
+                'controller' => 'letter',
+                'action' => 'view',
+                $disposition['letter_id']
+            ]);
         }
-
-        $letter = $this->Dispositions->Letters->get($disposition['letter_id'], [
-            'contain' => ['Evidences', 'Senders']
-        ]);
-        // only display departements with users exists and not active user departement
-        // first get current user's departement
-        $userDepartement = $this->Dispositions->Users->find('all', [
-            'conditions' => ['Users.id' => $this->Auth->user('id')],
-            'contain' => ['Departements']
-        ])->first();
-        // if user have departement use it, if not, use departement 1 which is PPNI Jatim
-        count($userDepartement['departements']) > 0 ? $departement_to_avoid = $userDepartement['departements'][0]['id'] : $departement_to_avoid = 1;
-        //print_r($userDepartement['departements'][0]['id']);
-        $departements = $this->Dispositions->Users->Departements
-            ->find('all', [
-                'conditions' => [
-                    'Departements.active' => 1,
-                    'Departements.parent_id !=' => 0,
-                    'Departements.id !=' => $departement_to_avoid
-                ],
-                'order' => ['name' => 'ASC']
-            ])
-            ->matching('Users', function($q) {
-                return $q->where(['Users.active' => 1]);
-            });
-        $departementsOptions = [];
-        foreach ($departements as $departement) {
-            $departementsOptions[$departement->id] = $departement->name;
-        }
-
-        $this->set('title', 'Disposisi Surat Masuk ' . $letter['number']);
-        $breadcrumbs = $this->breadcrumbs;
-        array_push($breadcrumbs, [
-            'letters/view/' . $letter['id'],
-            $letter['number']
-        ]);
-        array_push($breadcrumbs, [
-            'dispositions/edit',
-            'Ubah'
-        ]);
-        $this->set('breadcrumbs', $breadcrumbs);
-
-        $this->set(compact('disposition', 'departementsOptions', 'letter'));
-        $this->set('_serialize', ['disposition', 'departementsOptions', 'letter']);
     }
 
     /**

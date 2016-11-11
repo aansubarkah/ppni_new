@@ -106,9 +106,6 @@ class LettersController extends AppController
 
         $this->set('controllerObjectId', $id);
 
-        //$this->request->is('mobile') ? $isMobile = true : $isMobile = false;
-        //$this->set('isMobile', $isMobile);
-
         $this->set('title', $letter['number']);
         $this->set('letter', $letter);
         $this->set('dispositions', $dispositions);
@@ -116,6 +113,15 @@ class LettersController extends AppController
         // if current viewer login
         $this->Auth->user() ? $currentUserId = $this->Auth->user('id') : $currentUserId = 0;
         $this->set('currentUserId', $currentUserId);
+
+        // if current user have departement, she can add an disposition
+        $currentUserDepartement = $this->Letters->Users->find('all',[
+            'conditions' => ['Users.id' => $currentUserId],
+            'contain' => ['Departements']
+        ])->first();
+        if (count($currentUserDepartement['departements']) > 0) {
+            $this->set('isCurrentUserHaveDepartement', true);
+        }
 
         $this->set('_serialize', ['letter', 'dispositions']);
     }

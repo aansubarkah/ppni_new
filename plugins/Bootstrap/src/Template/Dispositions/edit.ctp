@@ -36,15 +36,22 @@ echo $this->Form->create($disposition, [
 ]);
 
 echo '<div class="form-group">';
-echo $this->Form->text('recipients', [
+
+echo $this->Form->text('recipient', [
     'label' => false,
-    'class' => 'form-control typeahead',
-    'placeholder' => 'Kepada',
-    'autocomplete' => 'off',
+    'class' => 'form-control',
+    'placeholder' => $recipientDepartement[0]['name'],
     'id' => 'sender',
     'required',
-    'data-error' => 'Kepada harus diisi'
+    'data-error' => 'Kepada harus diisi',
+    'value' => $recipientDepartement[0]['name'],
+    'disabled'
 ]);
+echo $this->Form->hidden('recipients', [
+    'id' => 'sender',
+    'value' => $recipientDepartement[0]['id']
+]);
+
 echo '</div>';
 
 echo '<div class="form-group">';
@@ -55,7 +62,8 @@ echo $this->Form->textarea('content', [
     'id' => 'content',
     'required',
     'autocomplete' => 'off',
-    'data-error' => 'Isi disposisi harus diisi'
+    'data-error' => 'Isi disposisi harus diisi',
+    'value' => $disposition['content']
 ]);
 echo '</div>';
 ?>
@@ -110,40 +118,6 @@ echo $this->JqueryFileUpload->loadScripts();
 ?>
 <script>
 $(function() {
-    // data source for senders
-    var recipientsData = [];
-<?php
-foreach($departementsOptions as $key=>$value)
-{
-?>
-    recipientsData.push({
-        value: "<?php echo $key; ?>",
-        text: "<?php echo $value; ?>"
-    });
-<?php
-}
-?>
-    // bloodhound
-    var engine = new Bloodhound({
-        local: recipientsData,
-        queryTokenizer: Bloodhound.tokenizers.whitespace,
-        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text')
-    });
-
-    var $recipient = $('.typeahead');
-    $recipient.tagsinput({
-        itemValue: 'value',
-        itemText: 'text',
-        tagClass: 'label label-default',
-        freeInput: false,
-        typeaheadjs: {
-            name: 'engine',
-            minLength: 3,
-            displayKey: 'text',
-            source: engine
-        }
-    });
-
     // upload file
     // first hide progress bar
     $('#parent').hide();
