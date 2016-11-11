@@ -18,6 +18,7 @@ class DispositionsController extends AppController
     public $breadcrumbs = [
         ['dispositions', 'Disposisi']
     ];
+    public $limit = 10;
 
     /**
      * Index method
@@ -26,11 +27,36 @@ class DispositionsController extends AppController
      */
     public function index()
     {
-        $this->paginate = [
-            'contain' => ['ParentDispositions', 'Letters', 'Users', 'Recipients']
-        ];
-        $dispositions = $this->paginate($this->Dispositions);
+        $query = $this->Dispositions->find('all', [
+            'conditions' => ['Dispositions.active' => 1],
+            'contain' => [
+                'Letters' => ['conditions' => ['Letters.active' => 1]],
+                'Recipients',
+                'Users'
+            ],
+            'limit' => $this->limit
+        ]);
+        if ($this->request->query('search'))
+        {
+            $query->where(['LOWER(Dispositions.content) LIKE' => '%' . strtolower($this->request->query('search')) . '%']);
+        }
+        if ($this->request->query('sort'))
+        {
+            $query->order([
+                'Dispositions.created' => $this->request->query('direction')
+            ]);
+        } else {
+            $query->order(['Dispositions.created' => 'DESC']);
+        }
+        $this->paginate = ['limit' => $this->limit];
 
+        $breadcrumbs = $this->breadcrumbs;
+        $this->set('breadcrumbs', $breadcrumbs);
+
+        $dispositions = $this->paginate($query);
+        //print_r($dispositions);
+        $this->set('title', 'Disposisi');
+        $this->set('limit', $this->limit);
         $this->set(compact('dispositions'));
         $this->set('_serialize', ['dispositions']);
     }

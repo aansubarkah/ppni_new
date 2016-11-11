@@ -42,7 +42,7 @@ class LettersController extends AppController
         ]);
         if ($this->request->query('search'))
         {
-            $query->where(['content LIKE' => '%' . $this->request->query('search') . '%']);
+            $query->where(['LOWER(content) LIKE' => '%' . strtolower($this->request->query('search')) . '%']);
         }
         if ($this->request->query('sort'))
         {
