@@ -206,6 +206,17 @@ echo $this->Html->link(
     ['escape' => false]
 );
 ?>
+                        </li>
+                        <li>
+<?php
+echo $this->Html->link(
+    '<i class="fa fa-briefcase fa-fw"></i> Disposisi',
+    ['controller' => 'dispositions',
+    'action' => 'index'],
+    ['escape' => false]
+);
+?>
+                        </li>
                         <li>
 <?php
 echo $this->Html->link(
