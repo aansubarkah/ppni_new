@@ -101,27 +101,44 @@ class LettersController extends AppController
             $letter['number']
         ]);
         $this->set('breadcrumbs', $breadcrumbs);
-
         $this->set('isShowEditButton', true);
-
         $this->set('controllerObjectId', $id);
-
         $this->set('title', $letter['number']);
-        $this->set('letter', $letter);
-        $this->set('dispositions', $dispositions);
 
-        // if current viewer login
-        $this->Auth->user() ? $currentUserId = $this->Auth->user('id') : $currentUserId = 0;
-        $this->set('currentUserId', $currentUserId);
+        // if current viewer is logged in
+        if ($this->Auth->user()) {
+            // if she is the chief
+            $userDepartements = $this->Letters->Users->get($this->Auth->user('id'), [
+                'contain' => ['Departements'],
+                'matching' => [
+                    'Departements' => function ($q) {
+                        return $q->where(['DepartementsUsers.active' => 1]);
+                    }
+                ]
+            ]);
+            if ($userDepartements['departements'][0]['id'] == 2) {
+                $letter->isread = 1;
+                $this->Letters->save($letter);
+            }
+
+            // if there are dispositions for her, make them read
+            $this->Letters->Dispositions->query()->update()
+                ->set(['isread' => 1])
+                ->where(['letter_id' => $id, 'recipient_id' => $this->Auth->user('id')])
+                ->execute();
+        }
 
         // if current user have departement, she can add an disposition
         $currentUserDepartement = $this->Letters->Users->find('all',[
-            'conditions' => ['Users.id' => $currentUserId],
+            'conditions' => ['Users.id' => $this->Auth->user('id')],
             'contain' => ['Departements']
         ])->first();
         if (count($currentUserDepartement['departements']) > 0) {
             $this->set('isCurrentUserHaveDepartement', true);
         }
+
+        $this->set('dispositions', $dispositions);
+        $this->set('letter', $letter);
 
         $this->set('_serialize', ['letter', 'dispositions']);
     }

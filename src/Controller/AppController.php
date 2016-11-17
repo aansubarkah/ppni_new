@@ -79,6 +79,8 @@ class AppController extends Controller
         $this->Auth->allow(['index', 'view', 'display']);
         $this->request->is('mobile') ? $isMobile = true : $isMobile = false;
         $this->set('isMobile', $isMobile);
+        $notifications = $this->getNotification();
+        $this->set('notifications', $notifications);
     }
 
     public function isAuthorized($user)
@@ -95,5 +97,54 @@ class AppController extends Controller
 
         // Default deny
         return false;
+    }
+
+    public function getNotification()
+    {
+        $User = $this->loadModel('Users');
+        $Letters = $this->loadModel('Letters');
+        $Dispositions = $this->loadModel('Dispositions');
+        $user = [];
+        $letters = [];
+        $dispositions = [];
+        $lettersNumber = 0;
+        $dispositionsNumber = 0;
+        if ($this->Auth->user()) {
+            $user = $User->get($this->Auth->user('id'), [
+                'contain' => [
+                    'Departements' => function ($q) {
+                        return $q
+                            ->where(['Departements.active' => 1]);
+                    }
+                ],
+                //'conditions' => ['Departements.active' => 1]
+            ]);
+
+            // if Ketua or Sekretaris
+            if ($user['departements'][0]['id'] == 2 ||
+                $user['departements'][0]['id'] == 7 ||
+                $user['departements'][0]['id'] == 8 ||
+                $user['departements'][0]['id'] == 9) {
+                $letters = $Letters->find('all', [
+                    'conditions' => ['Letters.active' => 1, 'Letters.isread' => 0],
+                    'contain' => ['Senders'],
+                    'limit' => 3,
+                    'order' => ['Letters.date' => 'DESC']
+                ]);
+                $lettersNumber = $letters->count();
+            }
+            $dispositions = $Dispositions->find('all', [
+                'conditions' => ['Dispositions.active' => 1, 'Dispositions.isread' => 0, 'Dispositions.recipient_id' => $user['id']],
+                'limit' => 3,
+                'order' => ['Dispositions.created' => 'DESC'],
+            ]);
+            $dispositionsNumber = $dispositions->count();
+        }
+        $return = [
+            'letters' => $letters,
+            'dispositions' => $dispositions,
+            'dispositionsNumber' => $dispositionsNumber,
+            'lettersNumber' => $lettersNumber];
+        return $return;
     }
 }

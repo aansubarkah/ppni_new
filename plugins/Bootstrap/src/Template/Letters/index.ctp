@@ -28,6 +28,11 @@ echo $this->Form->end();
                     <th>#</th>
                     <th>
 <?php
+echo $this->Paginator->sort('created', 'Tanggal Masuk');
+?>
+                    </th>
+                    <th>
+<?php
 echo $this->Paginator->sort('date', 'Tanggal');
 ?>
                     </th>
@@ -60,10 +65,17 @@ foreach($letters as $letter)
 ?>
                     </td>
                     <td>
+
     <script>
     moment.locale('id');
+    letterDate = moment('<?php echo $this->Time->format($letter->created, 'yyyy-MM-dd'); ?>').format('D MMMM YYYY');
+    document.write(letterDate);
+    </script>
+
+                    </td>
+                    <td>
+    <script>
     letterDate = moment('<?php echo $this->Time->format($letter->date, 'yyyy-MM-dd'); ?>').format('D MMMM YYYY');
-    //console.log(letterDate);
     document.write(letterDate);
     </script>
                     </td>

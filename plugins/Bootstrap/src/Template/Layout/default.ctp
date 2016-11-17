@@ -60,91 +60,87 @@ echo $this->Html->link(
             <!-- /.navbar-header -->
 
             <ul class="nav navbar-top-links navbar-right">
+<?php
+if ($notifications['lettersNumber'] > 0) {
+?>
                 <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                        <i class="fa fa-envelope fa-fw"></i> <i class="fa fa-caret-down"></i>
+                        <i class="fa fa-envelope fa-fw"></i>
+                        <i class="fa fa-caret-down"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-messages">
-                        <li>
-                            <a href="#">
-                                <div>
-                                    <strong>John Smith</strong>
-                                    <span class="pull-right text-muted">
-                                        <em>Yesterday</em>
-                                    </span>
-                                </div>
-                                <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
-                            </a>
-                        </li>
-                        <li class="divider"></li>
-                        <li>
-                            <a href="#">
-                                <div>
-                                    <strong>John Smith</strong>
-                                    <span class="pull-right text-muted">
-                                        <em>Yesterday</em>
-                                    </span>
-                                </div>
-                                <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
-                            </a>
-                        </li>
-                        <li class="divider"></li>
-                        <li>
-                            <a href="#">
-                                <div>
-                                    <strong>John Smith</strong>
-                                    <span class="pull-right text-muted">
-                                        <em>Yesterday</em>
-                                    </span>
-                                </div>
-                                <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>
-                            </a>
-                        </li>
-                        <li class="divider"></li>
-                        <li>
-                            <a class="text-center" href="#">
-                                <strong>Read All Messages</strong>
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-                        </li>
+<?php
+    foreach ($notifications['letters'] as $letter) {
+        echo '<li>';
+        $link = '<div>';
+        $link = $link . '<strong>' . $letter['number'] . '</strong>';
+        $link = $link . '<span class="pull-right text-muted">';
+        $link = $link . '<em>';
+        $link = $link . '<script>';
+        $link = $link . 'moment.locale("id");';
+        $link = $link . 'letterDate = moment("' . $this->Time->format($letter->date, 'yyyy-MM-dd') . '").format("D MMMM YYYY");';
+        $link = $link . 'document.write(letterDate);';
+        $link = $link . '</script>';
+        $link = $link . '</em>';
+        $link = $link . '</span>';
+        $link = $link . '</div>';
+        $link = $link . '<div>' . $letter['content'] . '</div>';
+        echo $this->Html->link($link,
+            ['controller' => 'letters', 'action' => 'view', $letter['id']],
+            ['escape' => false]
+        );
+        echo '</li>';
+        echo '<li class="divider"></li>';
+    }
+    echo '<li>';
+    echo $this->Html->link(
+        '<strong>Lihat Semua Surat Masuk</strong>',
+        ['controller' => 'letters', 'action' => 'index'],
+        ['escape' => false, 'class' => 'text-center']
+    );
+    echo '</li>';
+?>
                     </ul>
                     <!-- /.dropdown-messages -->
                 </li>
                 <!-- /.dropdown -->
-                <!-- /.dropdown -->
+<?php
+}
+if ($notifications['dispositionsNumber'] > 0) {
+?>
                 <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                         <i class="fa fa-bell fa-fw"></i> <i class="fa fa-caret-down"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-alerts">
-                        <li>
-                            <a href="#">
-                                <div>
-                                    <i class="fa fa-comment fa-fw"></i> New Comment
-                                    <span class="pull-right text-muted small">4 minutes ago</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="divider"></li>
-                        <li>
-                            <a href="#">
-                                <div>
-                                    <i class="fa fa-envelope fa-fw"></i> Message Sent
-                                    <span class="pull-right text-muted small">4 minutes ago</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="divider"></li>
-                        <li>
-                            <a class="text-center" href="#">
-                                <strong>See All Alerts</strong>
-                                <i class="fa fa-angle-right"></i>
-                            </a>
-                        </li>
+<?php
+    foreach ($notifications['dispositions'] as $disposition) {
+        echo '<li>';
+        $link = '<div>';
+        $link = $link . '<span class="pull-right text-muted small">';
+        $link = $link . '<script>';
+        $link = $link . 'letterDate = moment("' . $this->Time->format($disposition['created'], 'yyyy-MM-dd HH:mm') . '").fromNow();';
+        $link = $link . 'document.write(letterDate);';
+        $link = $link . '</script>';
+        $link = $link . '</span>';
+        //$link = $link . '<i class="fa fa-briefcase fa-fw"></i>';
+        $link = $link . $disposition['content'];
+        $link = $link . '</div>';
+        echo $this->Html->link($link,
+            ['controller' => 'letters', 'action' => 'view', $disposition['letter_id']],
+            ['escape' => false]
+        );
+        echo '</li>';
+        echo '<li class="divider"></li>';
+    }
+?>
                     </ul>
                     <!-- /.dropdown-alerts -->
                 </li>
                 <!-- /.dropdown -->
+<?php
+}
+?>
                 <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                         <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>

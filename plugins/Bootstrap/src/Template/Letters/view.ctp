@@ -1,3 +1,5 @@
+<?php
+?>
 <script>
 $(function(){
     moment.locale('id');
@@ -88,7 +90,7 @@ if (count($dispositions) > 0)
             ['escape' => false]
         );
 
-        if ($currentUserId == $disposition['user']['id']) {
+        if ($user['id'] == $disposition['user']['id']) {
             echo $this->Html->link(
                 '<i class="fa fa-pencil fa-fw"></i>',
                 ['controller' => 'dispositions', 'action' => 'edit', $disposition['id']],
@@ -128,7 +130,7 @@ if (count($dispositions) > 0)
             }
             echo '</span>';
         }
-        if ($currentUserId == $disposition['recipient_id']) {
+        if ($user['id'] == $disposition['recipient_id']) {
             echo '<span class="pull-right"><small>';
             echo $this->Html->link(
                 '<i class="fa fa-briefcase fa-fw"></i>&nbsp;' . 'Tindak Lanjuti',
