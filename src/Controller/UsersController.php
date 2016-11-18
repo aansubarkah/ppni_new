@@ -25,7 +25,7 @@ class UsersController extends AppController
 
     public function beforeFilter(Event $event) {
         parent::beforeFilter($event);
-        $this->Auth->allow('login', 'add');
+        $this->Auth->allow('login', 'add', 'profile', 'logout');
     }
 
     public function login()
@@ -45,6 +45,7 @@ class UsersController extends AppController
 
     public function logout()
     {
+        $this->Auth->logout();
         return $this->redirect($this->Auth->logout());
     }
     /**
@@ -101,6 +102,59 @@ class UsersController extends AppController
 
         $this->set('user', $user);
         $this->set('_serialize', ['user']);
+    }
+
+    /**
+     * Profile method
+     *
+     * @param string|null $id User id.
+     * @return \Cake\Network\Response|null
+     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
+     */
+    public function profile()
+    {
+        if ($this->Auth->user()) {
+            $id = $this->Auth->user('id');
+            $profile = $this->Users->get($id, [
+                'contain' => ['Groups', 'Departements']
+            ]);
+
+            $query = $this->Users->Dispositions->find('all', [
+                'conditions' => ['Dispositions.active' => 1, 'Dispositions.user_id' => $id],
+                'contain' => [
+                    'Letters' => ['conditions' => ['Letters.active' => 1]],
+                    'Recipients',
+                    'Users'
+                ],
+                'limit' => $this->limit
+            ]);
+            if ($this->request->query('search'))
+            {
+                $query->where(['LOWER(Dispositions.content) LIKE' => '%' . strtolower($this->request->query('search')) . '%']);
+            }
+            if ($this->request->query('sort'))
+            {
+                $query->order([
+                    'Dispositions.created' => $this->request->query('direction')
+                ]);
+            } else {
+                $query->order(['Dispositions.created' => 'DESC']);
+            }
+            $this->paginate = ['limit' => $this->limit];
+
+            $dispositions = $this->paginate($query);
+
+            $breadcrumbs = $this->breadcrumbs;
+            $this->set('breadcrumbs', $breadcrumbs);
+
+            $this->set('title', $profile['fullname']);
+            $this->set(compact(['dispositions']));
+            $this->set('limit', $this->limit);
+            $this->set('profile', $profile);
+            $this->set('_serialize', ['profile', 'dispositions']);
+        } else {
+            $this->redirect('index');
+        }
     }
 
     /**
