@@ -71,7 +71,7 @@ class AppController extends Controller
         }
         $this->viewBuilder()->theme('Bootstrap');
 
-        $this->set('user', $this->Auth->user());
+        //$this->set('user', $this->Auth->user());
     }
 
     public function beforeFilter(Event $event)

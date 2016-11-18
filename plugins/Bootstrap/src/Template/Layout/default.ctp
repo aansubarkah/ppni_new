@@ -150,7 +150,7 @@ if ($notifications['dispositionsNumber'] > 0) {
 if (isset($user)) {
     echo '<li>';
     echo $this->Html->link(
-        '<i class="fa fa-user fa-fw"></i>&nbsp;User Profile',
+        '<i class="fa fa-user fa-fw"></i>&nbsp;' . $user['fullname'],
         ['controller' => 'users', 'action' => 'profile'],
         ['escape' => false]
     );
@@ -223,6 +223,15 @@ echo $this->Html->link(
 );
 ?>
                         </li>
+<?php
+echo '<li>';
+echo $this->Html->link(
+    '<i class="fa fa-user fa-fw"></i> Pengguna',
+    ['controller' => 'users', 'action' => 'index'],
+    ['escape' => false]
+);
+echo '</li>';
+?>
                     </ul>
                 </div>
                 <!-- /.sidebar-collapse -->

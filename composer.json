@@ -11,7 +11,10 @@
         "cakephp/migrations": "~1.0",
         "cakephp/plugin-installer": "*",
         "friendsofcake/bootstrap-ui": "^0.5.1",
-        "hashmode/cakephp-jquery-file-upload": "~1.0"
+        "hashmode/cakephp-jquery-file-upload": "~1.0",
+        "friendsofcake/CakePdf": "^3.2",
+        "dompdf/dompdf": "^0.7.0",
+        "mpdf/mpdf": "^6.1"
     },
     "require-dev": {
         "psy/psysh": "@stable",
