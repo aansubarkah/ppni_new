@@ -155,6 +155,14 @@ if (isset($user)) {
         ['escape' => false]
     );
     echo '</li>';
+    echo '<li>';
+    echo $this->Html->link(
+        '<i class="fa fa-undo fa-fw"></i>&nbsp;Ubah Password',
+        ['controller' => 'users', 'action' => 'changePassword'],
+        ['escape' => false]
+    );
+    echo '</li>';
+
     echo '<li class="divider"></li>';
     echo '<li>';
     echo $this->Html->link(

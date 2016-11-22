@@ -5,6 +5,7 @@ use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
+use Cake\Auth\DefaultPasswordHasher;
 
 /**
  * Users Model
@@ -92,6 +93,38 @@ class UsersTable extends Table
             ->boolean('active')
             ->requirePresence('active', 'create')
             ->notEmpty('active');
+
+            return $validator;
+    }
+
+    public function validationPassword(Validator $validator) {
+
+        $validator ->add('oldPassword', 'custom',
+            [
+                'rule' => function($value, $context){
+                    $user = $this->get($context['data']['id']);
+                    if ($user) {
+                        if ((new DefaultPasswordHasher)->check($value, $user->password)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                },
+                'message' => 'The old password does not match the current password!',
+            ]) ->notEmpty('old_password');
+        $validator ->add('newPassword1', [
+        ]) ->add('newPassword1',[
+            'match'=> [
+                'rule'=> ['compareWith','newPassword2'],
+                'message'=>'The passwords does not match!', ]
+        ]) ->notEmpty('newPassword1');
+
+        $validator ->add('newPassword2', [
+        ]) ->add('newPassword2',[
+            'match' => [
+                'rule'=> ['compareWith','newPassword1'],
+                'message'=>'The passwords does not match!', ]
+        ]) ->notEmpty('newPassword2');
 
         return $validator;
     }

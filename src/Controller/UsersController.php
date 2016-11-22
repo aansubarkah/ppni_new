@@ -184,7 +184,10 @@ class UsersController extends AppController
                 $this->Flash->error(__('The user could not be saved. Please, try again.'));
             }
         }
-        $groups = $this->Users->Groups->find('list', ['limit' => 200]);
+        $groups = $this->Users->Groups->find('list', [
+            'limit' => 200,
+            'conditions' => ['active' => 1]
+        ]);
         $departements = $this->Users->Departements->find('treeList');
         $this->set('title', 'Pengguna');
         $breadcrumbs = $this->breadcrumbs;
@@ -233,7 +236,10 @@ class UsersController extends AppController
                 $this->Flash->error(__('The user could not be saved. Please, try again.'));
             }
         }
-        $groups = $this->Users->Groups->find('list', ['limit' => 200]);
+        $groups = $this->Users->Groups->find('list', [
+            'limit' => 200,
+            'conditions' => ['active' => 1]
+        ]);
         $departements = $this->Users->Departements->find('treeList');
         $this->set('title', 'Pengguna');
         $breadcrumbs = $this->breadcrumbs;
@@ -309,4 +315,60 @@ class UsersController extends AppController
         $this->Users->save($user);
         return $this->redirect(['action' => 'index']);
     }
+
+    /**
+     * Change Password method
+     *
+     * @return \Cake\Network\Response|null Redirects to index.
+     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
+     */
+    public function changePassword()
+    {
+        if ($this->Auth->user()) {
+            $this->set('title', 'Pengguna');
+            $breadcrumbs = $this->breadcrumbs;
+            array_push($breadcrumbs, [
+                'changePassword/',
+                'Ubah Password'
+            ]);
+            $this->set('breadcrumbs', $breadcrumbs);
+
+            $id = $this->Auth->user('id');
+            $editPassword = $this->Users->get($id);
+
+            if ($this->request->is(['patch', 'post', 'put'])) {
+                $editPassword = $this->Users->patchEntity($editPassword, [
+                    'oldPassword' => $this->request->data['oldPassword'],
+                    'password' => $this->request->data['newPassword1'],
+                    'newPassword1' => $this->request->data['newPassword1'],
+                    'newPassword2' => $this->request->data['newPassword2']
+                ],
+                ['validate' => 'password']
+            );
+                if ($this->Users->save($editPassword)) {
+                    $this->redirect(['action' => 'profile']);
+                } else {
+                    $error_msg = [];
+                    foreach ($editPassword->errors() as $errors) {
+                        if (is_array($errors)) {
+                            foreach ($errors as $error) {
+                                $error_msg[] = $error;
+                            }
+                        } else {
+                            $error_msg = $errors;
+                        }
+                    }
+
+                    if (!empty($error_msg)) {
+                        $this->set('isError', true);
+                        $this->Flash->error(implode('\n \r', $error_msg));
+                    }
+                }
+            }
+            $this->set('editPassword', $editPassword);
+        } else {
+            $this->redirect(['controller' => 'letters', 'action' => 'index']);
+        }
+    }
+
 }
