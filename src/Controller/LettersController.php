@@ -3,6 +3,7 @@ namespace App\Controller;
 
 use App\Controller\AppController;
 use Cake\I18n\Date;
+use Cake\Mailer\Email;
 
 /**
  * Letters Controller
@@ -185,6 +186,7 @@ class LettersController extends AppController
                         //return $this->redirect(['action' => 'index']);
                     }
                 }
+                if ($this->sendEmail($letter->id)) {}
                 return $this->redirect(['action' => 'index']);
 
                 //$this->Flash->success(__('The letter has been saved.'));
@@ -411,5 +413,93 @@ class LettersController extends AppController
     //{
         //$this->viewBuilder()->theme('Bootstrap');
     //}
+    public function newsletter() {
+        //$this->viewBuilder()->layout();
 
+        /*$this->viewBuilder()->options([
+            'pdfConfig' => [
+                'orientation' => 'potrait',
+                'filename' => 'test.pdf'
+            ]
+        ]);*/
+        /*$CakePdf = new \CakePdf\Pdf\CakePdf();
+        $CakePdf->template('newsletter', 'Bootstrap.default');
+        //$CakePdf->viewVars($this->viewVars);
+        $CakePdf->viewVars(['data' => 'testing']);
+        $pdf = $CakePdf->write(APP . 'files' . DS . 'newsletter.pdf');*/
+    }
+
+    public function sendEmail($letterId) {
+
+        // get letter info
+        $letter = $this->Letters->get($letterId, [
+            'contain' => ['Senders']
+        ]);
+
+        // get recipients
+        $recipients = $this->Letters->Users->DepartementsUsers->find();
+        $recipients->where(['DepartementsUsers.departement_id' => 2])
+            ->orWhere(['DepartementsUsers.departement_id' => 7])
+            ->andWhere(['DepartementsUsers.active' => 1])
+            ->contain(['Users']);
+        $to = $recipients->all();
+        $countTo = $recipients->count();
+
+        if ($countTo > 0) {
+            Email::configTransport('gmail', [
+                'host' => 'smtp.gmail.com',
+                'port' => 587,
+                'username' => 'serverppnijatim01@gmail.com',
+                'password' => 'RukoG4teway',
+                'className' => 'Smtp',
+                'tls' => true
+            ]);
+
+            foreach ($to as $t) {
+                if (!empty($t['user']['email'])) {
+                    $email = new Email();
+                    $email->transport('gmail');
+
+                    $email->viewVars(['title' => 'Surat Masuk', 'letter' => $letter, 'recipients' => $recipients]);
+                    $email->template('letter', 'default')
+                        ->helpers(['Url', 'Time'])
+                        ->emailFormat('html')
+                        ->from(['serverppnijatim01@gmail.com' => 'Surat Masuk PPNI Jatim'])
+                        ->to($t['user']['email'])
+                        ->subject('Surat Masuk')
+                        ->send();
+                }
+            }
+        }
+    }
+
+    public function recipients() {
+        /*$recipients = $this->Letters->Users->DepartementsUsers->find('all', [
+            'conditions' => [
+                'DepartementsUsers.departement_id' => [2, 7]
+            ],
+            'contain' => ['Users']
+        ]);*/
+        //print_r($recipients);
+        //debug($recipients);
+        /*foreach ($recipients as $recipient) {
+            print($recipient);
+            print('<br>');
+    }*/
+        $recipients = $this->Letters->Users->DepartementsUsers->find();
+        $recipients->where(['DepartementsUsers.departement_id' => 2])
+            ->orWhere(['DepartementsUsers.departement_id' => 7])
+            ->andWhere(['DepartementsUsers.active' => 1])
+        /*$recipients->where([
+            'OR' => [
+                'DepartementsUsers.departement_id' => 2,
+                'DepartementsUsers.departement_id' => 7
+            ]])*/
+        ->contain(['Users'])
+        ->all();
+        //print_r($recipients);
+        foreach($recipients as $recipient) {
+            print($recipient);
+        }
+    }
 }

@@ -51,7 +51,7 @@ echo $this->Form->text('date', [
     'label' => false,
     'class' => 'form-control datepicker',
     'placeholder' => 'Tanggal',
-    'default' => date('d/m/Y'),
+    'default' => date('d-m-Y'),
     'id' => 'date'
 ]);
 echo '</div>';

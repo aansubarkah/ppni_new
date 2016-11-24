@@ -228,4 +228,18 @@ Plugin::load('BootstrapUI');
 
 Plugin::load('CakephpJqueryFileUpload');
 
+Plugin::load('CakePdf', ['bootstrap' => true]);
+
+Configure::write('CakePdf', [
+    'engine' => 'CakePdf.Mpdf',
+    'margin' => [
+        'bottom' => 15,
+        'left' => 50,
+        'right' => 30,
+        'top' => 45
+    ],
+    'orientation' => 'landscape',
+    'download' => true
+]);
+
 //Plugin::load('Josegonzalez/Upload');

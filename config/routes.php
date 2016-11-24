@@ -64,6 +64,8 @@ Router::scope('/', function (RouteBuilder $routes) {
     );
 
     $routes->extensions(['json']);
+
+    $routes->addExtensions(['pdf']);
     /**
      * Connect catchall routes for all controllers.
      *
