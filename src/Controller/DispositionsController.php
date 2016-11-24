@@ -2,6 +2,8 @@
 namespace App\Controller;
 
 use App\Controller\AppController;
+use Cake\I18n\Date;
+use Cake\Mailer\Email;
 
 /**
  * Dispositions Controller
@@ -155,6 +157,7 @@ class DispositionsController extends AppController
                                 $newDisposition->evidences = [$evidence];
                                 $this->Dispositions->save($newDisposition);
                             }
+                            if ($this->sendEmail($newDisposition->id)) {}
                         }
                     }
                 }
@@ -356,5 +359,37 @@ class DispositionsController extends AppController
 
         //
         return parent::isAuthorized($user);
+    }
+
+    public function sendEmail($dispositionId) {
+        // get letter info
+        $disposition = $this->Dispositions->get($dispositionId, [
+            'contain' => ['Users', 'Recipients', 'Letters']
+        ]);
+        $letter = $this->Dispositions->Letters->get($disposition['letter_id'], [
+            'contain' => ['Senders']
+        ]);
+
+        if (!empty($disposition['recipient']['email'])) {
+            Email::configTransport('gmail', [
+                'host' => 'smtp.gmail.com',
+                'port' => 587,
+                'username' => 'serverppnijatim01@gmail.com',
+                'password' => 'RukoG4teway',
+                'className' => 'Smtp',
+                'tls' => true
+            ]);
+
+            $email = new Email();
+            $email->transport('gmail');
+            $email->viewVars(['title' => 'Disposisi', 'disposition' => $disposition, 'letter' => $letter]);
+            $email->template('disposition', 'default')
+                ->helpers(['Url', 'Time'])
+                ->emailFormat('html')
+                ->from(['serverppnijatim01@gmail.com' => 'Surat Masuk PPNI Jatim'])
+                ->to($disposition['recipient']['email'])
+                ->subject('Disposisi')
+                ->send();
+        }
     }
 }

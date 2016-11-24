@@ -430,7 +430,6 @@ class LettersController extends AppController
     }
 
     public function sendEmail($letterId) {
-
         // get letter info
         $letter = $this->Letters->get($letterId, [
             'contain' => ['Senders']
@@ -474,30 +473,12 @@ class LettersController extends AppController
     }
 
     public function recipients() {
-        /*$recipients = $this->Letters->Users->DepartementsUsers->find('all', [
-            'conditions' => [
-                'DepartementsUsers.departement_id' => [2, 7]
-            ],
-            'contain' => ['Users']
-        ]);*/
-        //print_r($recipients);
-        //debug($recipients);
-        /*foreach ($recipients as $recipient) {
-            print($recipient);
-            print('<br>');
-    }*/
         $recipients = $this->Letters->Users->DepartementsUsers->find();
         $recipients->where(['DepartementsUsers.departement_id' => 2])
             ->orWhere(['DepartementsUsers.departement_id' => 7])
             ->andWhere(['DepartementsUsers.active' => 1])
-        /*$recipients->where([
-            'OR' => [
-                'DepartementsUsers.departement_id' => 2,
-                'DepartementsUsers.departement_id' => 7
-            ]])*/
-        ->contain(['Users'])
-        ->all();
-        //print_r($recipients);
+            ->contain(['Users'])
+            ->all();
         foreach($recipients as $recipient) {
             print($recipient);
         }
