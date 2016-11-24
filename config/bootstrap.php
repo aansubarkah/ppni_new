@@ -238,7 +238,7 @@ Configure::write('CakePdf', [
         'right' => 30,
         'top' => 45
     ],
-    'orientation' => 'landscape',
+    'orientation' => 'potrait',
     'download' => true
 ]);
 

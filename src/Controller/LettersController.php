@@ -186,6 +186,7 @@ class LettersController extends AppController
                         //return $this->redirect(['action' => 'index']);
                     }
                 }
+                if ($this->createBlankDispositionForm($letter->id)) {}
                 if ($this->sendEmail($letter->id)) {}
                 return $this->redirect(['action' => 'index']);
 
@@ -319,6 +320,7 @@ class LettersController extends AppController
                         //return $this->redirect(['action' => 'index']);
                     //}
                 }
+                if ($this->createBlankDispositionForm($letter->id)) {}
                 return $this->redirect('/letters/view/' . $letter->id);
             } else {
                 $this->Flash->error(__('The letter could not be saved. Please, try again.'));
@@ -409,27 +411,19 @@ class LettersController extends AppController
         return parent::isAuthorized($user);
     }
 
-    //public function beforeRender(\Cake\Event\Event $event)
-    //{
-        //$this->viewBuilder()->theme('Bootstrap');
-    //}
-    public function newsletter() {
-        //$this->viewBuilder()->layout();
-
-        /*$this->viewBuilder()->options([
-            'pdfConfig' => [
-                'orientation' => 'potrait',
-                'filename' => 'test.pdf'
-            ]
-        ]);*/
-        /*$CakePdf = new \CakePdf\Pdf\CakePdf();
-        $CakePdf->template('newsletter', 'Bootstrap.default');
-        //$CakePdf->viewVars($this->viewVars);
-        $CakePdf->viewVars(['data' => 'testing']);
-        $pdf = $CakePdf->write(APP . 'files' . DS . 'newsletter.pdf');*/
+    private function createBlankDispositionForm($letterId) {
+    //public function newsletter($letterId) {
+        $letter = $this->Letters->get($letterId, [
+            'contain' => ['Senders', 'Vias']
+        ]);
+        $CakePdf = new \CakePdf\Pdf\CakePdf();
+        $CakePdf->template('newsletter', 'default');
+        $CakePdf->viewVars(['letter' => $letter]);
+        $pdf = $CakePdf->write(WWW_ROOT . 'files' . DS . 'dispositions' . DS . $letter['id'] . '.pdf');
     }
 
-    public function sendEmail($letterId) {
+    private function sendEmail($letterId) {
+    //public function sendEmail($letterId) {
         // get letter info
         $letter = $this->Letters->get($letterId, [
             'contain' => ['Senders']
@@ -469,18 +463,6 @@ class LettersController extends AppController
                         ->send();
                 }
             }
-        }
-    }
-
-    public function recipients() {
-        $recipients = $this->Letters->Users->DepartementsUsers->find();
-        $recipients->where(['DepartementsUsers.departement_id' => 2])
-            ->orWhere(['DepartementsUsers.departement_id' => 7])
-            ->andWhere(['DepartementsUsers.active' => 1])
-            ->contain(['Users'])
-            ->all();
-        foreach($recipients as $recipient) {
-            print($recipient);
         }
     }
 }
