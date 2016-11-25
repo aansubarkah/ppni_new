@@ -15,6 +15,24 @@ class EvidencesController extends AppController
 
     private $filesDirectory = WWW_ROOT . 'files' . DS . 'evidences' . DS;
 
+    public function isAuthorized($user)
+    {
+        // All registered users can
+        if ($this->request->action === 'add' ||
+            $this->request->action === 'index' ||
+            $this->request->action === 'view' ||
+            $this->request->action === 'edit' ||
+            $this->request->action === 'delete' ||
+            $this->request->action === 'download' ||
+            $this->request->action === 'upload'
+        ) {
+            return true;
+        }
+
+        //
+        return parent::isAuthorized($user);
+    }
+
     public function initialize()
     {
         parent::initialize();

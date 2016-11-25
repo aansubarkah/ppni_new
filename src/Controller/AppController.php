@@ -71,7 +71,7 @@ class AppController extends Controller
         }
         $this->viewBuilder()->theme('Bootstrap');
 
-        //$this->set('user', $this->Auth->user());
+        $this->set('user', $this->Auth->user());
     }
 
     public function beforeFilter(Event $event)
@@ -80,7 +80,7 @@ class AppController extends Controller
         $this->set('isMobile', $isMobile);
         $notifications = $this->getNotification();
         $this->set('notifications', $notifications);
-        $this->Auth->allow(['index', 'view', 'display', 'profile', 'logout', 'login']);
+        //$this->Auth->allow(['index', 'view', 'display']);
     }
 
     public function isAuthorized($user)

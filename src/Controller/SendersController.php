@@ -21,6 +21,20 @@ class SendersController extends AppController
         ['senders', 'Pengirim']
     ];
 
+    public function isAuthorized($user)
+    {
+        // All registered users can
+        if ($this->request->action === 'add' ||
+            $this->request->action === 'index' ||
+            $this->request->action === 'view' ||
+            $this->request->action === 'edit'
+        ) {
+            return true;
+        }
+
+        //
+        return parent::isAuthorized($user);
+    }
 
     /**
      * Index method
@@ -189,18 +203,5 @@ class SendersController extends AppController
         }*/
 
         return $this->redirect(['action' => 'index']);
-    }
-
-    public function isAuthorized($user)
-    {
-        // All registered users can add, edit, delete
-        if ($this->request->action === 'add' ||
-            $this->request->action === 'edit' ||
-            $this->request->action === 'delete') {
-            return true;
-        }
-
-        //
-        return parent::isAuthorized($user);
     }
 }

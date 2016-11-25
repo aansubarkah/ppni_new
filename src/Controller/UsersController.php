@@ -23,9 +23,24 @@ class UsersController extends AppController
         ['users', 'Pengguna']
     ];
 
+    public function isAuthorized($user)
+    {
+        // All registered users can view profile
+        if ($this->request->action === 'view' ||
+            $this->request->action === 'profile' ||
+            $this->request->action === 'changePassword' ||
+            $this->request->action === 'logout'
+        ){
+            return true;
+        }
+
+        //
+        return parent::isAuthorized($user);
+    }
+
     public function beforeFilter(Event $event) {
         parent::beforeFilter($event);
-        $this->Auth->allow('login', 'add', 'profile', 'logout');
+        $this->Auth->allow('add', 'logout');
     }
 
     public function login()
@@ -370,5 +385,4 @@ class UsersController extends AppController
             $this->redirect(['controller' => 'letters', 'action' => 'index']);
         }
     }
-
 }

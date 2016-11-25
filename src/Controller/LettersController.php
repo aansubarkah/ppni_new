@@ -24,6 +24,20 @@ class LettersController extends AppController
         ['letters', 'Surat Masuk']
     ];
 
+    public function isAuthorized($user)
+    {
+        // All registered users can add letters
+        if ($this->request->action === 'add' ||
+            $this->request->action === 'index' ||
+            $this->request->action === 'view'
+        ) {
+            return true;
+        }
+
+        //
+        return parent::isAuthorized($user);
+    }
+
     public function initialize()
     {
         parent::initialize();
@@ -406,17 +420,6 @@ class LettersController extends AppController
         }*/
 
         return $this->redirect(['action' => 'index']);
-    }
-
-    public function isAuthorized($user)
-    {
-        // All registered users can add letters
-        if ($this->request->action === 'add') {
-            return true;
-        }
-
-        //
-        return parent::isAuthorized($user);
     }
 
     private function createBlankDispositionForm($letterId) {
