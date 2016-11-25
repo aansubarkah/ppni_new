@@ -4,6 +4,8 @@ namespace App\Controller;
 use App\Controller\AppController;
 use Cake\I18n\Date;
 use Cake\Mailer\Email;
+use Cake\Filesystem\Folder;
+use Cake\Filesystem\File;
 
 /**
  * Dispositions Controller
@@ -21,6 +23,12 @@ class DispositionsController extends AppController
         ['dispositions', 'Disposisi']
     ];
     public $limit = 10;
+
+    public function initialize()
+    {
+        parent::initialize();
+        $this->loadComponent('RequestHandler');
+    }
 
     /**
      * Index method
@@ -390,6 +398,30 @@ class DispositionsController extends AppController
                 ->to($disposition['recipient']['email'])
                 ->subject('Disposisi')
                 ->send();
+        }
+    }
+
+    public function download($id = null)
+    {
+        $letter = $this->Dispositions->Letters->get($id, [
+            'contain' => ['Senders']
+        ]);
+        $date = new Date($letter['date']);
+        $newName = 'FormDisposisi_SuratMasuk_' . $letter['number'];
+        $newName = $newName . '_Tanggal_' . $date->format('d_m_Y');
+        $newName = $newName . '_Dari_' . $letter['sender']['name'] . '.pdf';
+
+        $path = WWW_ROOT . 'files' . DS . 'dispositions' . DS . $id . '.pdf';
+        // create a cakephp file object
+        $existingFile = new File($path, false, 755);
+
+        // if exists on directory
+        if ($existingFile->exists()) {
+            $this->response->file(
+                $path,
+                ['download' => true, 'name' => $newName]
+            );
+            return $this->response;
         }
     }
 }

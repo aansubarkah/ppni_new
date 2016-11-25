@@ -21,6 +21,13 @@ foreach($letter['evidences'] as $evidence) {
     );
     echo '&nbsp;';
 }
+if(isset($isBlankDispositionFormExists)) {
+    echo $this->Html->link(
+        '<i class="fa fa-suitcase fa-fw"></i>&nbsp;Form Disposisi',
+        '/form/' . $letter['id'],
+        ['escape' => false]
+    );
+}
 ?>
     <footer>
         Pengirim:&nbsp;

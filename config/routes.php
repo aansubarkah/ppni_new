@@ -63,6 +63,12 @@ Router::scope('/', function (RouteBuilder $routes) {
         ['id' => '\d+', 'pass' => ['id']]
     );
 
+    $routes->connect(
+        '/form/:id',
+        ['controller' => 'Dispositions', 'action' => 'download'],
+        ['id' => '\d+', 'pass' => ['id']]
+    );
+
     $routes->extensions(['json']);
 
     $routes->addExtensions(['pdf']);

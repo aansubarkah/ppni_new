@@ -4,6 +4,7 @@ namespace App\Controller;
 use App\Controller\AppController;
 use Cake\I18n\Date;
 use Cake\Mailer\Email;
+use Cake\Filesystem\File;
 
 /**
  * Letters Controller
@@ -136,6 +137,13 @@ class LettersController extends AppController
         ])->first();
         if (count($currentUserDepartement['departements']) > 0) {
             $this->set('isCurrentUserHaveDepartement', true);
+        }
+      //$pdf = $CakePdf->write(WWW_ROOT . 'files' . DS . 'dispositions' . DS . $letter['id'] . '.pdf');
+
+        // check if blank disposition form file exists
+        $blankDispositionForm = new File(WWW_ROOT . 'files' . DS . 'dispositions' . DS . $letter['id'] . '.pdf');
+        if ($blankDispositionForm->exists()) {
+            $this->set('isBlankDispositionFormExists', true);
         }
 
         $this->set('dispositions', $dispositions);
